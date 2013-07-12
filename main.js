@@ -15,13 +15,17 @@ define(function (require, exports, module) {"use strict";
 		currentCursor,
 		timer;
 
-	var LEFT, RIGHT, UP, DOWN;
+	var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN;
 
 	function setColemak() {
 		LEFT = 78;
 		RIGHT = 73;
 		UP = 85;
 		DOWN = 69;
+		HOME = 72;
+		END = 79;
+		SCROLLUP = 76;
+		SCROLLDN = 89;
 	}
 
 	setColemak();
@@ -31,8 +35,15 @@ define(function (require, exports, module) {"use strict";
 	}
 
 	function moveCursor(direction) {
-		var cursor, token, pos;
+		var cursor, token, pos, coords;
 		cursor = doc.getCursor();
+		if (doc.getMode(cursor).name === "null") {
+			if (direction === LEFT)
+				CodeMirror.commands["goGroupLeft"](cm);
+			else if (direction === RIGHT)
+				CodeMirror.commands["goGroupRight"](cm);
+			return;
+		}
 		if (direction === LEFT) {
 			token = cm.getTokenAt(cursor, true);
 			if (token.string === ' ') {
@@ -40,7 +51,6 @@ define(function (require, exports, module) {"use strict";
 				token = cm.getTokenAt(cursor, true);
 			}
 			pos = CodeMirror.Pos(cursor.line, token.start);
-
 		} else if (direction === RIGHT) {
 			cursor.ch += 1;
 			token = cm.getTokenAt(cursor, true);
@@ -49,20 +59,20 @@ define(function (require, exports, module) {"use strict";
 				token = cm.getTokenAt(cursor, true);
 			}
 			pos = CodeMirror.Pos(cursor.line, token.end);
-		} else if (direction === UP) {
-
-		} else if (direction === DOWN) {
-
 		}
 		doc.setCursor(pos);
 	}
 
 	function command(key) {
-		if (key === LEFT || key === RIGHT || key === UP || key === DOWN) {
-			moveCursor(key);
+		switch(key){
+			case LEFT:
+			case RIGHT: moveCursor(key); break;
+			case UP: cm.moveV(-1, "line"); break;
+			case DOWN: cm.moveV(1, "line"); break;
+			case HOME: CodeMirror.commands["goLineStartSmart"](cm); break;
+			case END: CodeMirror.commands["goLineEnd"](cm); break;
 		}
 	}
-
     document.onkeydown = function (e) {
 //		timer = performance.webkitNow();
 		editor = EditorManager.getFocusedEditor();
