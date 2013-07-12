@@ -1,4 +1,4 @@
-var intervalID, globalCounter, ccm;
+var intervalID, globalCounter, ccm, globalUp;
 define(function (require, exports, module) {"use strict";
 	console.log("vii is running");
     var CommandManager = brackets.getModule("command/CommandManager"),
@@ -72,14 +72,11 @@ define(function (require, exports, module) {"use strict";
 	}
 
 	function scroll(up){
-		var top = ccm.getScrollInfo().top;
-//		for(var i = 0; i < 10; i++){
-//			top = up ? top+100 : top-100;
-//			ccm.scrollTo(null, top);
-//		}
-
-		globalCounter = 0;
-		intervalID = setInterval("console.log(\"vvv\"); if(++globalCounter>10) intervalID = clearInterval(intervalID);", 1000);
+		if (intervalID) intervalID = clearInterval(intervalID);
+		globalUp = up;
+		ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-60 : ccm.getScrollInfo().top+60);
+		globalCounter = 60;
+		intervalID = setInterval("ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-globalCounter : ccm.getScrollInfo().top+globalCounter); globalCounter-=5; if(globalCounter<2) intervalID = clearInterval(intervalID);", 10);
 	}
 
 	function command(key) {
