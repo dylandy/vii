@@ -12,7 +12,8 @@ define(function (require, exports, module) {"use strict";
 		editor,
 		doc,
 		cm,
-		currentCursor;
+		currentCursor,
+		timer;
 
 	var LEFT, RIGHT, UP, DOWN;
 
@@ -29,17 +30,41 @@ define(function (require, exports, module) {"use strict";
 		doc.replaceRange(text, editor.getCursorPos());
 	}
 
+	function moveCursor(direction) {
+		var cursor, token, pos;
+		cursor = doc.getCursor();
+		if (direction === LEFT) {
+			token = cm.getTokenAt(cursor, true);
+			if (token.string === ' ') {
+				cursor.ch -= 1;
+				token = cm.getTokenAt(cursor, true);
+			}
+			pos = CodeMirror.Pos(cursor.line, token.start);
+
+		} else if (direction === RIGHT) {
+			cursor.ch += 1;
+			token = cm.getTokenAt(cursor, true);
+			if (token.string === ' ') {
+				cursor.ch += 1;
+				token = cm.getTokenAt(cursor, true);
+			}
+			pos = CodeMirror.Pos(cursor.line, token.end);
+		} else if (direction === UP) {
+
+		} else if (direction === DOWN) {
+
+		}
+		doc.setCursor(pos);
+	}
+
 	function command(key) {
-		if (key === LEFT) {
-			currentCursor.ch -= 1;
-            editor.setCursorPos(currentCursor);
-		} else if (key === RIGHT) {
-			currentCursor.ch += 1;
-            editor.setCursorPos(currentCursor);
+		if (key === LEFT || key === RIGHT || key === UP || key === DOWN) {
+			moveCursor(key);
 		}
 	}
 
     document.onkeydown = function (e) {
+//		timer = performance.webkitNow();
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) {
 			return true;
@@ -48,8 +73,8 @@ define(function (require, exports, module) {"use strict";
 
 		if (e.keyCode === 32) { // space down
 			if (spaceDown) {
-				console.error('vii: spaceDown is already true');
-				return true;
+//				console.error('vii: spaceDown is already true');
+//				return true;
 			} else {
 				spaceDown = true;
 			}
@@ -80,10 +105,10 @@ define(function (require, exports, module) {"use strict";
 				return false;
 			} else {
 				inserted = true;
+//				console.log(performance.webkitNow()-timer);
 				return true;
 			}
 		}
-
 		return true;
 	};
 
@@ -94,8 +119,8 @@ define(function (require, exports, module) {"use strict";
 		}
 		e = e || window.event;
 		currentCursor = editor.getCursorPos();
-        doc = editor.document;
         cm = editor._codeMirror;
+		doc = cm.getDoc();
 
 		if (e.keyCode === 32) { // space up
 			if (spaceDown) {
