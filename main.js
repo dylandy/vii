@@ -1,3 +1,4 @@
+var intervalID, globalCounter, ccm;
 define(function (require, exports, module) {"use strict";
 	console.log("vii is running");
     var CommandManager = brackets.getModule("command/CommandManager"),
@@ -11,7 +12,6 @@ define(function (require, exports, module) {"use strict";
 		keyCount = 0,
 		editor,
 		doc,
-		cm,
 		currentCursor,
 		timer;
 
@@ -39,38 +39,59 @@ define(function (require, exports, module) {"use strict";
 		cursor = doc.getCursor();
 		if (doc.getMode(cursor).name === "null") {
 			if (direction === LEFT)
-				CodeMirror.commands["goGroupLeft"](cm);
+				CodeMirror.commands["goGroupLeft"](ccm);
 			else if (direction === RIGHT)
-				CodeMirror.commands["goGroupRight"](cm);
+				CodeMirror.commands["goGroupRight"](ccm);
 			return;
 		}
 		if (direction === LEFT) {
-			token = cm.getTokenAt(cursor, true);
+			token = ccm.getTokenAt(cursor, true);
 			if (token.string === ' ') {
 				cursor.ch -= 1;
-				token = cm.getTokenAt(cursor, true);
+				token = ccm.getTokenAt(cursor, true);
 			}
-			pos = CodeMirror.Pos(cursor.line, token.start);
+			var group = ccm.findPosH(cursor, -1, 'group');
+			var word = ccm.findPosH(cursor, -1, 'word');
+			if (group.line != cursor.line) group.ch = 0;
+			if (word.line != cursor.line) word.ch = 0;
+			pos = CodeMirror.Pos(cursor.line, Math.max(token.start, group.ch, word.ch));
 		} else if (direction === RIGHT) {
 			cursor.ch += 1;
-			token = cm.getTokenAt(cursor, true);
+			token = ccm.getTokenAt(cursor, true);
 			if (token.string === ' ') {
 				cursor.ch += 1;
-				token = cm.getTokenAt(cursor, true);
+				token = ccm.getTokenAt(cursor, true);
 			}
-			pos = CodeMirror.Pos(cursor.line, token.end);
+			group = ccm.findPosH(cursor, 1, 'group');
+			word = ccm.findPosH(cursor, 1, 'word');
+			if (group.line != cursor.line) group.ch = Infinity;
+			if (word.line != cursor.line) word.ch = Infinity;
+			pos = CodeMirror.Pos(cursor.line, Math.min(token.end, group.ch, word.ch));
 		}
 		doc.setCursor(pos);
+	}
+
+	function scroll(up){
+		var top = ccm.getScrollInfo().top;
+//		for(var i = 0; i < 10; i++){
+//			top = up ? top+100 : top-100;
+//			ccm.scrollTo(null, top);
+//		}
+
+		globalCounter = 0;
+		intervalID = setInterval("console.log(\"vvv\"); if(++globalCounter>10) intervalID = clearInterval(intervalID);", 1000);
 	}
 
 	function command(key) {
 		switch(key){
 			case LEFT:
 			case RIGHT: moveCursor(key); break;
-			case UP: cm.moveV(-1, "line"); break;
-			case DOWN: cm.moveV(1, "line"); break;
-			case HOME: CodeMirror.commands["goLineStartSmart"](cm); break;
-			case END: CodeMirror.commands["goLineEnd"](cm); break;
+			case UP: ccm.moveV(-1, "line"); break;
+			case DOWN: ccm.moveV(1, "line"); break;
+			case HOME: CodeMirror.commands["goLineStartSmart"](ccm); break;
+			case END: CodeMirror.commands["goLineEnd"](ccm); break;
+			case SCROLLUP: scroll(true); break;
+			case SCROLLDN: scroll(false); break;
 		}
 	}
     document.onkeydown = function (e) {
@@ -129,8 +150,8 @@ define(function (require, exports, module) {"use strict";
 		}
 		e = e || window.event;
 		currentCursor = editor.getCursorPos();
-        cm = editor._codeMirror;
-		doc = cm.getDoc();
+        ccm = editor._codeMirror;
+		doc = ccm.getDoc();
 
 		if (e.keyCode === 32) { // space up
 			if (spaceDown) {
@@ -167,3 +188,8 @@ define(function (require, exports, module) {"use strict";
 	}
 		}
 	  );
+/* TEST AREA
+
+enoieanr stanrostinnnnneee
+www.noitamina.com
+*/
