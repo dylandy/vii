@@ -9,6 +9,9 @@ define(function (require, exports, module) {"use strict";
 		lastKey = "",
 		inserted = false,
 		moved = false,
+		sameKey = false,
+		shouldRepeat = false,
+		repeated = false,
 		keyCount = 0,
 		editor,
 		doc,
@@ -100,12 +103,13 @@ define(function (require, exports, module) {"use strict";
 			case DOWN10: for(var i=0; i<10; i++) ccm.moveV(1, "line"); break;
 		}
 	}
+
     document.onkeydown = function (e) {
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) return true;
 		e = e || window.event;
 
-		if (e.keyCode != 32) keyCount += 1;
+//		if (e.keyCode != 32) keyCount += 1;
 		if (e.keyCode === 32) { // space down
 			spaceDown = true;
 			return false;
@@ -115,23 +119,34 @@ define(function (require, exports, module) {"use strict";
 				 (e.keyCode >= 48 && e.keyCode <= 57) ||
 				 (e.keyCode >= 186 && e.keyCode <= 192) ||
 				 (e.keyCode >= 219 && e.keyCode <= 222)) { // key down
+			var k;
 			switch(e.keyCode){
-				case 187: lastKey = "="; break;
-				case 189: lastKey = "-"; break;
-				case 219: lastKey = "["; break;
-				case 221: lastKey = "]"; break;
-				case 220: lastKey = "\\"; break;
-				case 186: lastKey = ";"; break;
-				case 222: lastKey = "\'"; break;
-				case 188: lastKey = ","; break;
-				case 190: lastKey = "."; break;
-				case 191: lastKey = "/"; break;
-				default: lastKey = String.fromCharCode(e.keyCode).toLowerCase();
+				case 187: k = "="; break;
+				case 189: k = "-"; break;
+				case 219: k = "["; break;
+				case 221: k = "]"; break;
+				case 220: k = "\\"; break;
+				case 186: k = ";"; break;
+				case 222: k = "\'"; break;
+				case 188: k = ","; break;
+				case 190: k = "."; break;
+				case 191: k = "/"; break;
+				default: k = String.fromCharCode(e.keyCode).toLowerCase();
 			}
+			if (k != lastKey) {
+				keyCount += 1;
+				lastKey = k;
+			} else shouldRepeat = true;
+
 			if (spaceDown) {
 				keyDown = true;
 				inserted = false;
-//				if (moved) console.log('repeat event');
+				if (moved) shouldRepeat = true;
+				if (shouldRepeat) {
+					repeated = true;
+					command(e.keyCode);
+					console.log('repeat');
+				}
 				return false;
 			} else {
 				inserted = true;
@@ -142,6 +157,7 @@ define(function (require, exports, module) {"use strict";
 	};
 
 	document.onkeyup = function (e) {
+		console.log(keyCount); // do not remove until space repeating last key is resolved.
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) {
 			return true;
@@ -153,10 +169,18 @@ define(function (require, exports, module) {"use strict";
 //		var margin = ccm.getOption("cursorScrollMargin");
 //		if (margin<100) ccm.setOption("cursorScrollMargin", 100);
 
-		if (e.keyCode != 32) keyCount -= 1;
+		if (e.keyCode != 32 &&
+			((e.keyCode >= 65 && e.keyCode <= 90) ||
+				 (e.keyCode >= 48 && e.keyCode <= 57) ||
+				 (e.keyCode >= 186 && e.keyCode <= 192) ||
+				 (e.keyCode >= 219 && e.keyCode <= 222)))
+			keyCount -= 1;
+
 		if (e.keyCode === 32) { // space up
 			if (spaceDown) {
 				spaceDown = false;
+				shouldRepeat = false;
+				repeated = false;
 				if (moved) moved = false;
 				else if (keyDown) {
 					insert(" " + lastKey);
@@ -177,11 +201,15 @@ define(function (require, exports, module) {"use strict";
 				 (e.keyCode >= 48 && e.keyCode <= 57) ||
 				 (e.keyCode >= 186 && e.keyCode <= 192) ||
 				 (e.keyCode >= 219 && e.keyCode <= 222)) { // key up
-			if (spaceDown && keyDown && !inserted) {
+			if (spaceDown && keyDown && !inserted && !repeated) {
 				command(e.keyCode);
 				moved = true;
 			}
-			if (keyCount < 1) keyDown = false;
+			if (keyCount < 1) {
+				keyDown = false;
+				lastKey = '';
+				keyCount = 0;
+			}
 			console.log(keyCount); // do not remove until space repeating last key is resolved.
 			return false;
 		}
