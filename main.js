@@ -106,6 +106,7 @@ define(function (require, exports, module) {"use strict";
 		if (!editor) return true;
 		e = e || window.event;
 
+		if (e.keyCode != 32) keyCount += 1;
 		if (e.keyCode === 32) { // space down
 			spaceDown = true;
 			return false;
@@ -128,7 +129,6 @@ define(function (require, exports, module) {"use strict";
 				case 191: lastKey = "/"; break;
 				default: lastKey = String.fromCharCode(e.keyCode).toLowerCase();
 			}
-			keyCount += 1;
 			if (spaceDown) {
 				keyDown = true;
 				inserted = false;
@@ -151,9 +151,10 @@ define(function (require, exports, module) {"use strict";
 		currentCursor = editor.getCursorPos();
         ccm = editor._codeMirror;
 		doc = ccm.getDoc();
-		var margin = ccm.getOption("cursorScrollMargin");
-		if (margin<100) ccm.setOption("cursorScrollMargin", 100);
+//		var margin = ccm.getOption("cursorScrollMargin");
+//		if (margin<100) ccm.setOption("cursorScrollMargin", 100);
 
+		if (e.keyCode != 32) keyCount -= 1;
 		if (e.keyCode === 32) { // space up
 			if (spaceDown) {
 				spaceDown = false;
@@ -170,32 +171,26 @@ define(function (require, exports, module) {"use strict";
 				console.error("vii: space is already up");
 				return true;
 			}
+			return true;
 		}
 
 		else if ((e.keyCode >= 65 && e.keyCode <= 90) ||
 				 (e.keyCode >= 48 && e.keyCode <= 57) ||
 				 (e.keyCode >= 186 && e.keyCode <= 192) ||
 				 (e.keyCode >= 219 && e.keyCode <= 222)) { // key up
-			keyCount -= 1;
 			if (spaceDown && keyDown && !inserted) {
 				command(e.keyCode);
 				moved = true;
 			}
 			if (keyCount < 1) keyDown = false;
+			console.log(keyCount); // do not remove until space repeating last key is resolved.
 			return false;
 		}
-
 		return true;
-	}
-
-	document.onkeypress = function (e) {
-		if (e.keyCode >= 65 && e.keyCode <= 90 && moved)
-			console.log('key repeat');
 	}
 		}
 	  );
 /* TEST AREA
-
 enoieanr stanrostinnnnneee
 www.noitamina.com
 */
