@@ -15,7 +15,8 @@ define(function (require, exports, module) {"use strict";
 		currentCursor,
 		timer;
 
-	var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN;
+	var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
+		DOCHOME, DOCEND, DOWN10, UP10;
 
 	function setColemak() {
 		LEFT = 78;
@@ -26,6 +27,10 @@ define(function (require, exports, module) {"use strict";
 		END = 79;
 		SCROLLUP = 76;
 		SCROLLDN = 89;
+		DOCHOME = 74;
+		DOCEND = 186;
+		UP10 = 56;
+		DOWN10 = 188;
 	}
 
 	setColemak();
@@ -89,6 +94,10 @@ define(function (require, exports, module) {"use strict";
 			case END: CodeMirror.commands["goLineEnd"](ccm); break;
 			case SCROLLUP: scroll(true); break;
 			case SCROLLDN: scroll(false); break;
+			case DOCHOME: CodeMirror.commands["goDocStart"](ccm); break;
+			case DOCEND: CodeMirror.commands["goDocEnd"](ccm); break;
+			case UP10: for(var i=0; i<10; i++) ccm.moveV(-1, "line"); break;
+			case DOWN10: for(var i=0; i<10; i++) ccm.moveV(1, "line"); break;
 		}
 	}
     document.onkeydown = function (e) {
@@ -149,6 +158,8 @@ define(function (require, exports, module) {"use strict";
 		currentCursor = editor.getCursorPos();
         ccm = editor._codeMirror;
 		doc = ccm.getDoc();
+		var margin = ccm.getOption("cursorScrollMargin");
+		if (margin<100) ccm.setOption("cursorScrollMargin", 100);
 
 		if (e.keyCode === 32) { // space up
 			if (spaceDown) {
