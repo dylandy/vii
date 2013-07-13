@@ -101,7 +101,6 @@ define(function (require, exports, module) {"use strict";
 		}
 	}
     document.onkeydown = function (e) {
-//		timer = performance.webkitNow();
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) return true;
 		e = e || window.event;
