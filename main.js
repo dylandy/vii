@@ -103,18 +103,11 @@ define(function (require, exports, module) {"use strict";
     document.onkeydown = function (e) {
 //		timer = performance.webkitNow();
 		editor = EditorManager.getFocusedEditor();
-		if (!editor) {
-			return true;
-		}
+		if (!editor) return true;
 		e = e || window.event;
 
 		if (e.keyCode === 32) { // space down
-			if (spaceDown) {
-//				console.error('vii: spaceDown is already true');
-//				return true;
-			} else {
-				spaceDown = true;
-			}
+			spaceDown = true;
 			return false;
 		}
 
@@ -139,10 +132,10 @@ define(function (require, exports, module) {"use strict";
 			if (spaceDown) {
 				keyDown = true;
 				inserted = false;
+//				if (moved) console.log('repeat event');
 				return false;
 			} else {
 				inserted = true;
-//				console.log(performance.webkitNow()-timer);
 				return true;
 			}
 		}
@@ -193,6 +186,11 @@ define(function (require, exports, module) {"use strict";
 		}
 
 		return true;
+	}
+
+	document.onkeypress = function (e) {
+		if (e.keyCode >= 65 && e.keyCode <= 90 && moved)
+			console.log('key repeat');
 	}
 		}
 	  );
