@@ -1,5 +1,7 @@
 var intervalID, globalCounter, ccm, globalUp;
-define(function (require, exports, module) {"use strict";
+define(function (require, exports, module) {
+	"use strict";
+	require([require.toUrl('./commands.js')]);
 	console.log("vii is running");
     var CommandManager = brackets.getModule("command/CommandManager"),
         EditorManager  = brackets.getModule("editor/EditorManager"),
@@ -105,6 +107,7 @@ define(function (require, exports, module) {"use strict";
 	}
 
     document.onkeydown = function (e) {
+		hello();
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) return true;
 		e = e || window.event;
@@ -157,7 +160,7 @@ define(function (require, exports, module) {"use strict";
 	};
 
 	document.onkeyup = function (e) {
-		console.log(keyCount); // do not remove until space repeating last key is resolved.
+//		console.log(keyCount); // do not remove until space repeating last key is resolved.
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) {
 			return true;
@@ -208,16 +211,15 @@ define(function (require, exports, module) {"use strict";
 			if (keyCount < 1) {
 				keyDown = false;
 				lastKey = '';
-				keyCount = 0;
+				keyCount = 0; // prevent problem with hot key
 			}
-			console.log(keyCount); // do not remove until space repeating last key is resolved.
+//			console.log(keyCount); // do not remove until space repeating last key is resolved.
 			return false;
 		}
 		return true;
 	}
-		}
-	  );
+	});
 /* TEST AREA
-enoieanr stanrostinnnnneee
+enoieanr stanrostinnnnneee bal bal la rtsneia
 www.noitamina.com
 */
