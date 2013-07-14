@@ -82,6 +82,12 @@ function joinLines() {
 	doc.setCursor(cursor);
 }
 
+function insertLineBefore() {
+	ccm.moveV(-1, "line");
+	CodeMirror.commands["goLineEnd"](ccm);
+	CodeMirror.commands["newlineAndIndent"](ccm);
+}
+
 function testCommand(){
-	joinLines();
+	insertLineBefore();
 }

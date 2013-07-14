@@ -10,7 +10,8 @@ var spaceDown = false,
 	keyCount = 0,
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
-	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST, LINEUP, LINEDOWN;
+	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
+	LINEUP, LINEDOWN, NEWLINEBEFORE;
 var CommandManager,	EditorManager,	Menus, KeyBindingManager;
 
 define(function (require, exports, module) {
@@ -41,6 +42,7 @@ define(function (require, exports, module) {
 		TEST = 49;
 		LINEUP = 87;
 		LINEDOWN = 82;
+		NEWLINEBEFORE = 222;
 	}
 	setColemak();
 
@@ -71,6 +73,7 @@ define(function (require, exports, module) {
 			case TEST: testCommand(); break;
 			case LINEUP: CommandManager.execute('edit.lineUp'); break;
 			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
+			case NEWLINEBEFORE: insertLineBefore(); break;
 		}
 	}
 
