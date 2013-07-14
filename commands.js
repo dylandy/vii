@@ -70,7 +70,7 @@ function scroll(up) {
 
 function joinLines() {
 	var cursor = doc.getCursor();
-	if (cursor.line === doc.lineCount()) return;
+	if (cursor.line >= doc.lastLine()) return;
 	CodeMirror.commands["goLineStartSmart"](ccm);
 	var from = doc.getCursor();
 	ccm.moveV(1, "line");
