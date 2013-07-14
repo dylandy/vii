@@ -10,7 +10,7 @@ var spaceDown = false,
 	keyCount = 0,
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
-	DOCHOME, DOCEND, DOWN10, UP10;
+	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS;
 var CommandManager,	EditorManager,	Menus;
 
 define(function (require, exports, module) {
@@ -28,12 +28,14 @@ define(function (require, exports, module) {
 		DOWN = 69;
 		HOME = 72;
 		END = 79;
-		SCROLLUP = 76;
-		SCROLLDN = 89;
+		SCROLLUP = 70;
+		SCROLLDN = 83;
 		DOCHOME = 74;
 		DOCEND = 186;
-		UP10 = 56;
-		DOWN10 = 188;
+		UP10 = 76;
+		DOWN10 = 89;
+		CENTER = 67;
+		FOCUS = 77;
 	}
 	setColemak();
 
@@ -49,8 +51,10 @@ define(function (require, exports, module) {
 			case SCROLLDN: scroll(false); break;
 			case DOCHOME: CodeMirror.commands["goDocStart"](ccm); break;
 			case DOCEND: CodeMirror.commands["goDocEnd"](ccm); break;
-			case UP10: for(var i=0; i<10; i++) ccm.moveV(-1, "line"); break;
-			case DOWN10: for(var i=0; i<10; i++) ccm.moveV(1, "line"); break;
+			case UP10: moveCursor10(true); break;
+			case DOWN10: moveCursor10(false); break;
+			case CENTER: centerCursor(); break;
+			case FOCUS: focusAtCenter(); break;
 		}
 	}
 

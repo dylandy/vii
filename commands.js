@@ -1,6 +1,7 @@
 function insert(text) {
 	doc.replaceRange(text, editor.getCursorPos());
 }
+
 function moveCursor(direction) {
 	var cursor, token, pos, coords;
 	cursor = doc.getCursor();
@@ -37,13 +38,36 @@ function moveCursor(direction) {
 	}
 	doc.setCursor(pos);
 }
-function scroll(up){
+
+function moveCursor10(up) {
+	var cursor = doc.getCursor();
+	cursor.line += up ? -5 : 5;
+	doc.setCursor(cursor);
+	CodeMirror.commands["goLineEnd"](ccm);
+	if (doc.getCursor().ch > 100) doc.setCursor(cursor);
+}
+
+function centerCursor() {
+	var margin = ccm.getScrollInfo().clientHeight * 0.49;
+	ccm.scrollIntoView(doc.getCursor(), margin);
+}
+
+function focusAtCenter() {
+	var scrollInfo = ccm.getScrollInfo();
+	var x = scrollInfo.clientWidth/2;
+	var y = scrollInfo.clientHeight/2;
+	var ch = ccm.coordsChar({left:x, top:y});
+	doc.setCursor(ch);
+}
+
+function scroll(up) {
 	if (intervalID) intervalID = clearInterval(intervalID);
 	globalUp = up;
 	ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-60 : ccm.getScrollInfo().top+60);
 	globalCounter = 60;
 	intervalID = setInterval("ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-globalCounter : ccm.getScrollInfo().top+globalCounter); globalCounter-=5; if(globalCounter<2) intervalID = clearInterval(intervalID);", 10);
 }
+
 function hello(){
 	console.log('hello');
 }
