@@ -68,6 +68,20 @@ function scroll(up) {
 	intervalID = setInterval("ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-globalCounter : ccm.getScrollInfo().top+globalCounter); globalCounter-=5; if(globalCounter<2) intervalID = clearInterval(intervalID);", 10);
 }
 
-function hello(){
-	console.log('hello');
+function joinLines() {
+	var cursor = doc.getCursor();
+	if (cursor.line === doc.lineCount()) return;
+	CodeMirror.commands["goLineStartSmart"](ccm);
+	var from = doc.getCursor();
+	ccm.moveV(1, "line");
+	CodeMirror.commands["goLineEnd"](ccm);
+	var to = doc.getCursor();
+	var thisLine = doc.getLine(cursor.line);
+	var nextLine = doc.getLine(cursor.line+1);
+	doc.replaceRange(thisLine.trim()+" "+nextLine.trim(), from, to);
+	doc.setCursor(cursor);
+}
+
+function testCommand(){
+	joinLines();
 }

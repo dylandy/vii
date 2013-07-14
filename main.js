@@ -10,8 +10,8 @@ var spaceDown = false,
 	keyCount = 0,
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
-	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS;
-var CommandManager,	EditorManager,	Menus;
+	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST, LINEUP, LINEDOWN;
+var CommandManager,	EditorManager,	Menus, KeyBindingManager;
 
 define(function (require, exports, module) {
 	"use strict";
@@ -20,6 +20,8 @@ define(function (require, exports, module) {
 	CommandManager = brackets.getModule("command/CommandManager");
 	EditorManager  = brackets.getModule("editor/EditorManager");
 	Menus          = brackets.getModule("command/Menus");
+	KeyBindingManager = brackets.getModule("command/KeyBindingManager");
+//	console.log(KeyBindingManager);
 
 	function setColemak() {
 		LEFT = 78;
@@ -36,8 +38,19 @@ define(function (require, exports, module) {
 		DOWN10 = 89;
 		CENTER = 67;
 		FOCUS = 77;
+		TEST = 49;
+		LINEUP = 87;
+		LINEDOWN = 82;
 	}
 	setColemak();
+
+	function j(){ joinLines(); }
+	CommandManager.register("Join Lines", "vii.joinLines", j);
+	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+	KeyBindingManager.removeBinding("Ctrl-J");
+	KeyBindingManager.removeBinding("Cmd-J");
+  	menu.addMenuDivider();
+  	menu.addMenuItem("vii.joinLines", "Ctrl-J");
 
 	function command(key) {
 		switch(key){
@@ -55,6 +68,9 @@ define(function (require, exports, module) {
 			case DOWN10: moveCursor10(false); break;
 			case CENTER: centerCursor(); break;
 			case FOCUS: focusAtCenter(); break;
+			case TEST: testCommand(); break;
+			case LINEUP: CommandManager.execute('edit.lineUp'); break;
+			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
 		}
 	}
 
