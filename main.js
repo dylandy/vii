@@ -17,7 +17,6 @@ define(function (require, exports, module) {
 	"use strict";
 	require([require.toUrl('./commands.js')]);
 	console.log("vii is running");
-
 	CommandManager = brackets.getModule("command/CommandManager");
 	EditorManager  = brackets.getModule("editor/EditorManager");
 	Menus          = brackets.getModule("command/Menus");
@@ -56,7 +55,6 @@ define(function (require, exports, module) {
 	}
 
     document.onkeydown = function (e) {
-		hello();
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) return true;
 		e = e || window.event;
@@ -96,7 +94,6 @@ define(function (require, exports, module) {
 				if (shouldRepeat) {
 					repeated = true;
 					command(e.keyCode);
-					console.log('repeat');
 				}
 				return false;
 			} else {
@@ -108,7 +105,6 @@ define(function (require, exports, module) {
 	};
 
 	document.onkeyup = function (e) {
-//		console.log(keyCount); // do not remove until space repeating last key is resolved.
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) {
 			return true;
@@ -159,9 +155,8 @@ define(function (require, exports, module) {
 				lastKey = '';
 				keyCount = 0; // prevent problem with hot key
 			}
-//			console.log(keyCount); // do not remove until space repeating last key is resolved.
 			return false;
 		}
 		return true;
 	}
-	});
+});
