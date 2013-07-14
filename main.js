@@ -1,27 +1,26 @@
 var intervalID, globalCounter, ccm, globalUp;
+var spaceDown = false,
+	keyDown = false,
+	lastKey = "",
+	inserted = false,
+	moved = false,
+	sameKey = false,
+	shouldRepeat = false,
+	repeated = false,
+	keyCount = 0,
+	editor,	doc, currentCursor,	timer;
+var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
+	DOCHOME, DOCEND, DOWN10, UP10;
+var CommandManager,	EditorManager,	Menus;
+
 define(function (require, exports, module) {
 	"use strict";
 	require([require.toUrl('./commands.js')]);
 	console.log("vii is running");
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        EditorManager  = brackets.getModule("editor/EditorManager"),
-        Menus          = brackets.getModule("command/Menus"),
-		spaceDown = false,
-		keyDown = false,
-		lastKey = "",
-		inserted = false,
-		moved = false,
-		sameKey = false,
-		shouldRepeat = false,
-		repeated = false,
-		keyCount = 0,
-		editor,
-		doc,
-		currentCursor,
-		timer;
 
-	var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
-		DOCHOME, DOCEND, DOWN10, UP10;
+	CommandManager = brackets.getModule("command/CommandManager");
+	EditorManager  = brackets.getModule("editor/EditorManager");
+	Menus          = brackets.getModule("command/Menus");
 
 	function setColemak() {
 		LEFT = 78;
@@ -37,57 +36,7 @@ define(function (require, exports, module) {
 		UP10 = 56;
 		DOWN10 = 188;
 	}
-
 	setColemak();
-
-	function insert(text) {
-		doc.replaceRange(text, editor.getCursorPos());
-	}
-
-	function moveCursor(direction) {
-		var cursor, token, pos, coords;
-		cursor = doc.getCursor();
-		if (doc.getMode(cursor).name === "null") {
-			if (direction === LEFT)
-				CodeMirror.commands["goGroupLeft"](ccm);
-			else if (direction === RIGHT)
-				CodeMirror.commands["goGroupRight"](ccm);
-			return;
-		}
-		if (direction === LEFT) {
-			token = ccm.getTokenAt(cursor, true);
-			if (token.string === ' ') {
-				cursor.ch -= 1;
-				token = ccm.getTokenAt(cursor, true);
-			}
-			var group = ccm.findPosH(cursor, -1, 'group');
-			var word = ccm.findPosH(cursor, -1, 'word');
-			if (group.line != cursor.line) group.ch = 0;
-			if (word.line != cursor.line) word.ch = 0;
-			pos = CodeMirror.Pos(cursor.line, Math.max(token.start, group.ch, word.ch));
-		} else if (direction === RIGHT) {
-			cursor.ch += 1;
-			token = ccm.getTokenAt(cursor, true);
-			if (token.string === ' ') {
-				cursor.ch += 1;
-				token = ccm.getTokenAt(cursor, true);
-			}
-			group = ccm.findPosH(cursor, 1, 'group');
-			word = ccm.findPosH(cursor, 1, 'word');
-			if (group.line != cursor.line) group.ch = Infinity;
-			if (word.line != cursor.line) word.ch = Infinity;
-			pos = CodeMirror.Pos(cursor.line, Math.min(token.end, group.ch, word.ch));
-		}
-		doc.setCursor(pos);
-	}
-
-	function scroll(up){
-		if (intervalID) intervalID = clearInterval(intervalID);
-		globalUp = up;
-		ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-60 : ccm.getScrollInfo().top+60);
-		globalCounter = 60;
-		intervalID = setInterval("ccm.scrollTo(null, globalUp ? ccm.getScrollInfo().top-globalCounter : ccm.getScrollInfo().top+globalCounter); globalCounter-=5; if(globalCounter<2) intervalID = clearInterval(intervalID);", 10);
-	}
 
 	function command(key) {
 		switch(key){
@@ -112,7 +61,6 @@ define(function (require, exports, module) {
 		if (!editor) return true;
 		e = e || window.event;
 
-//		if (e.keyCode != 32) keyCount += 1;
 		if (e.keyCode === 32) { // space down
 			spaceDown = true;
 			return false;
@@ -169,8 +117,6 @@ define(function (require, exports, module) {
 		currentCursor = editor.getCursorPos();
         ccm = editor._codeMirror;
 		doc = ccm.getDoc();
-//		var margin = ccm.getOption("cursorScrollMargin");
-//		if (margin<100) ccm.setOption("cursorScrollMargin", 100);
 
 		if (e.keyCode != 32 &&
 			((e.keyCode >= 65 && e.keyCode <= 90) ||
@@ -219,7 +165,3 @@ define(function (require, exports, module) {
 		return true;
 	}
 	});
-/* TEST AREA
-enoieanr stanrostinnnnneee bal bal la rtsneia
-www.noitamina.com
-*/
