@@ -22,7 +22,6 @@ define(function (require, exports, module) {
 	EditorManager  = brackets.getModule("editor/EditorManager");
 	Menus          = brackets.getModule("command/Menus");
 	KeyBindingManager = brackets.getModule("command/KeyBindingManager");
-//	console.log(KeyBindingManager);
 
 	function setColemak() {
 		LEFT = 78;
@@ -46,8 +45,15 @@ define(function (require, exports, module) {
 	}
 	setColemak();
 
-	function j(){ joinLines(); }
+	function j() { joinLines(); }
+	function delLines() {
+		CommandManager.execute('edit.deletelines');
+		ccm.moveV(-1, "line");
+		CodeMirror.commands["goLineEnd"](ccm);
+		doc.setCursor(doc.getCursor());
+	}
 	CommandManager.register("Join Lines", "vii.joinLines", j);
+	CommandManager.register("Delete Lines and Go Up", "vii.deleteLines", delLines);
 	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 	KeyBindingManager.removeBinding("Cmd-J");
 	KeyBindingManager.removeBinding("Shift-Cmd-D");
@@ -55,8 +61,10 @@ define(function (require, exports, module) {
 	KeyBindingManager.removeBinding("Ctrl-Cmd-Down");
 	KeyBindingManager.removeBinding("Ctrl-Tab");
 	KeyBindingManager.removeBinding("Ctrl-Shift-Tab");
+	KeyBindingManager.addBinding('edit.deletelines','Shift-Delete');
   	menu.addMenuDivider();
   	menu.addMenuItem("vii.joinLines", "Ctrl-J");
+  	menu.addMenuItem("vii.deleteLines", "Shift-Backspace");
 
 	function command(key) {
 		switch(key){
@@ -77,7 +85,7 @@ define(function (require, exports, module) {
 			case TEST: testCommand(); break;
 			case LINEUP: CommandManager.execute('edit.lineUp'); break;
 			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
-			case NEWLINEBEFORE: insertLineBefore(); break;
+//			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
 		}
 	}
 
