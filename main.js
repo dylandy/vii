@@ -11,7 +11,7 @@ var spaceDown = false,
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
-	LINEUP, LINEDOWN, NEWLINEBEFORE;
+	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC;
 var CommandManager,	EditorManager,	Menus, KeyBindingManager;
 
 define(function (require, exports, module) {
@@ -49,8 +49,12 @@ define(function (require, exports, module) {
 	function j(){ joinLines(); }
 	CommandManager.register("Join Lines", "vii.joinLines", j);
 	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
-	KeyBindingManager.removeBinding("Ctrl-J");
 	KeyBindingManager.removeBinding("Cmd-J");
+	KeyBindingManager.removeBinding("Shift-Cmd-D");
+	KeyBindingManager.removeBinding("Ctrl-Cmd-Up");
+	KeyBindingManager.removeBinding("Ctrl-Cmd-Down");
+	KeyBindingManager.removeBinding("Ctrl-Tab");
+	KeyBindingManager.removeBinding("Ctrl-Shift-Tab");
   	menu.addMenuDivider();
   	menu.addMenuItem("vii.joinLines", "Ctrl-J");
 

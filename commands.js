@@ -69,17 +69,29 @@ function scroll(up) {
 }
 
 function joinLines() {
-	var cursor = doc.getCursor();
-	if (cursor.line >= doc.lastLine()) return;
-	CodeMirror.commands["goLineStartSmart"](ccm);
-	var from = doc.getCursor();
-	ccm.moveV(1, "line");
-	CodeMirror.commands["goLineEnd"](ccm);
-	var to = doc.getCursor();
-	var thisLine = doc.getLine(cursor.line);
-	var nextLine = doc.getLine(cursor.line+1);
-	doc.replaceRange(thisLine.trim()+" "+nextLine.trim(), from, to);
-	doc.setCursor(cursor);
+	editor = EditorManager.getFocusedEditor();
+	if (!editor) return true;
+	ccm = editor._codeMirror;
+	doc = ccm.getDoc();
+
+	if (doc.somethingSelected()) {
+		var splitted = doc.getSelection().split("\n"),
+			result = "";
+		for(var i in splitted) result += splitted[i].trim() + " ";
+		doc.replaceSelection(result);
+	} else {
+		var cursor = doc.getCursor();
+		if (cursor.line >= doc.lastLine()) return;
+		CodeMirror.commands["goLineStartSmart"](ccm);
+		var from = doc.getCursor();
+		ccm.moveV(1, "line");
+		CodeMirror.commands["goLineEnd"](ccm);
+		var to = doc.getCursor();
+		var thisLine = doc.getLine(cursor.line);
+		var nextLine = doc.getLine(cursor.line+1);
+		doc.replaceRange(thisLine.trim()+" "+nextLine.trim(), from, to);
+		doc.setCursor(cursor);
+	}
 }
 
 function insertLineBefore() {
