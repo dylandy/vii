@@ -1,3 +1,10 @@
+function initGlobalArgs(){
+	editor = EditorManager.getFocusedEditor();
+	if (!editor) return;
+	ccm = editor._codeMirror;
+	doc = ccm.getDoc();
+}
+
 function insert(text) {
 	doc.replaceRange(text, editor.getCursorPos());
 }
@@ -69,10 +76,8 @@ function scroll(up) {
 }
 
 function joinLines() {
-	editor = EditorManager.getFocusedEditor();
+	initGlobalArgs;
 	if (!editor) return true;
-	ccm = editor._codeMirror;
-	doc = ccm.getDoc();
 
 	if (doc.somethingSelected()) {
 		var splitted = doc.getSelection().split("\n"),
@@ -102,4 +107,32 @@ function insertLineBefore() {
 
 function testCommand(){
 	insertLineBefore();
+}
+
+function deleteLeftWord(){
+	console.log('delete left word stub');
+}
+
+function deleteRightWord(){
+	console.log('delete right word stub');
+}
+
+function deleteLines() {
+	initGlobalArgs();
+	if (!editor) return;
+	CommandManager.execute('edit.deletelines');
+	ccm.moveV(-1, "line");
+	CodeMirror.commands["goLineEnd"](ccm);
+	doc.setCursor(doc.getCursor());
+}
+
+function deleteToHead() {
+	initGlobalArgs();
+	if (!editor) return;
+	var cursorRight = doc.getCursor(),
+		cursorLeft = doc.getCursor();
+	CodeMirror.commands["goLineStartSmart"](ccm);
+	var head = doc.getCursor().ch;
+	cursorLeft.ch = head;
+	doc.replaceRange("", cursorLeft, cursorRight);
 }

@@ -11,7 +11,8 @@ var spaceDown = false,
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
-	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC;
+	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC,
+	BACKSPACE, DEL;
 var CommandManager,	EditorManager,	Menus, KeyBindingManager;
 
 define(function (require, exports, module) {
@@ -42,18 +43,20 @@ define(function (require, exports, module) {
 		LINEUP = 87;
 		LINEDOWN = 82;
 		NEWLINEBEFORE = 222;
+		BACKSPACE = 8;
+		DEL = 46;
 	}
 	setColemak();
 
 	function j() { joinLines(); }
-	function delLines() {
-		CommandManager.execute('edit.deletelines');
-		ccm.moveV(-1, "line");
-		CodeMirror.commands["goLineEnd"](ccm);
-		doc.setCursor(doc.getCursor());
-	}
+	function dl() { deleteLines(); }
+	function delToTail() { CodeMirror.commands["killLine"](ccm); }
+	function delToHead() { deleteToHead(); }
+
 	CommandManager.register("Join Lines", "vii.joinLines", j);
-	CommandManager.register("Delete Lines and Go Up", "vii.deleteLines", delLines);
+	CommandManager.register("Delete Lines and Go Up", "vii.deleteLines", dl);
+	CommandManager.register("Delete To Head", "vii.deleteToHead", delToHead);
+	CommandManager.register("Delete To Tail", "vii.deleteToTail", delToTail);
 	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 	KeyBindingManager.removeBinding("Cmd-J");
 	KeyBindingManager.removeBinding("Shift-Cmd-D");
@@ -65,6 +68,8 @@ define(function (require, exports, module) {
   	menu.addMenuDivider();
   	menu.addMenuItem("vii.joinLines", "Ctrl-J");
   	menu.addMenuItem("vii.deleteLines", "Shift-Backspace");
+  	menu.addMenuItem("vii.deleteToHead", "Cmd-Backspace");
+  	menu.addMenuItem("vii.deleteToTail", "Cmd-Delete");
 
 	function command(key) {
 		switch(key){
@@ -85,8 +90,17 @@ define(function (require, exports, module) {
 			case TEST: testCommand(); break;
 			case LINEUP: CommandManager.execute('edit.lineUp'); break;
 			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
-//			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
+			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
 		}
+	}
+
+	function specialKeyHandle(key) { // return true if handled
+		switch(key){
+			case DEL: deleteRightWord(); break;
+			case BACKSPACE: deleteLeftWord(); break;
+			default: return false;
+		}
+		return true;
 	}
 
     document.onkeydown = function (e) {
@@ -136,6 +150,15 @@ define(function (require, exports, module) {
 				return true;
 			}
 		}
+
+		else if (spaceDown && (
+			e.keyCode === BACKSPACE ||
+			e.keyCode === DEL)) {
+			specialKeyHandle(e.keyCode);
+			moved = true;
+			return false;
+		}
+
 		return true;
 	};
 
