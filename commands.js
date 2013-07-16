@@ -1,3 +1,13 @@
+function countSpacesAtEnd(str) {
+	var i = str.length - 1;
+	while(i >= 0 && str.substr(i, 1) === ' ') i -= 1;
+	return str.length-i-1;
+}
+function countTabsAtHead(str) {
+	var i = 0;
+	while(i < str.length && str.substr(i, 1) === '\t') i += 1;
+	return i;
+}
 function initGlobalArgs(){
 	editor = EditorManager.getFocusedEditor();
 	if (!editor) return;
@@ -21,6 +31,11 @@ function moveCursor(direction) {
 	}
 	if (direction === LEFT) {
 		token = ccm.getTokenAt(cursor, true);
+		var spaceCount = countSpacesAtEnd(token.string);
+		if (spaceCount > 0 && cursor.ch === token.end && token.string.trim().length === 0) {
+			doc.setCursor(CodeMirror.Pos(cursor.line, cursor.ch-spaceCount));
+			return;
+		}
 		if (token.string === ' ') {
 			cursor.ch -= 1;
 			token = ccm.getTokenAt(cursor, true);
@@ -31,6 +46,12 @@ function moveCursor(direction) {
 		if (word.line != cursor.line) word.ch = 0;
 		pos = CodeMirror.Pos(cursor.line, Math.max(token.start, group.ch, word.ch));
 	} else if (direction === RIGHT) {
+		var x = doc.getLine(cursor.line);
+		if (cursor.ch === 0 && x.substring(0,1) === '\t') {
+			var tabCount = countTabsAtHead(x);
+			doc.setCursor(CodeMirror.Pos(cursor.line, tabCount));
+			return
+		}
 		cursor.ch += 1;
 		token = ccm.getTokenAt(cursor, true);
 		if (token.string === ' ') {
@@ -47,11 +68,8 @@ function moveCursor(direction) {
 }
 
 function moveCursor10(up) {
-	var cursor = doc.getCursor();
-	cursor.line += up ? -5 : 5;
-	doc.setCursor(cursor);
-	CodeMirror.commands["goLineEnd"](ccm);
-	if (doc.getCursor().ch > 100) doc.setCursor(cursor);
+	for(var i = 0; i < 5; i++)
+		ccm.moveV(up ? -1 : 1, "line");
 }
 
 function centerCursor() {
@@ -109,17 +127,39 @@ function testCommand(){
 	insertLineBefore();
 }
 
-function deleteLeftWord(){
-	console.log('delete left word stub');
+function selectWord(){
+
 }
 
-function deleteRightWord(){
-	console.log('delete right word stub');
+function deleteWord(direction){
+	var cursor = doc.getCursor(),
+		left = doc.getCursor(),
+		right = doc.getCursor();
+	if (doc.somethingSelected())
+		doc.replaceSelection("");
+	else if (direction === LEFT) {
+		moveCursor(LEFT);
+		left.ch = doc.getCursor().ch;
+		moveCursor(RIGHT);
+		right.ch = doc.getCursor().ch;
+		if (right.ch < cursor.ch) right = cursor;
+	} else if (direction === RIGHT) {
+		moveCursor(RIGHT);
+		right.ch = doc.getCursor().ch;
+		moveCursor(LEFT);
+		left.ch = doc.getCursor().ch;
+		if (left.ch > cursor.ch) left = cursor;
+	}
+	doc.setSelection(left, right);
 }
 
 function deleteLines() {
 	initGlobalArgs();
 	if (!editor) return;
+	if (doc.somethingSelected()) {
+		doc.replaceSelection("");
+		return;
+	}
 	CommandManager.execute('edit.deletelines');
 	ccm.moveV(-1, "line");
 	CodeMirror.commands["goLineEnd"](ccm);
@@ -129,6 +169,10 @@ function deleteLines() {
 function deleteToHead() {
 	initGlobalArgs();
 	if (!editor) return;
+	if (doc.somethingSelected()) {
+		doc.replaceSelection("");
+		return;
+	}
 	var cursorRight = doc.getCursor(),
 		cursorLeft = doc.getCursor();
 	CodeMirror.commands["goLineStartSmart"](ccm);

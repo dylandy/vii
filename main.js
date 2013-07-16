@@ -8,6 +8,7 @@ var spaceDown = false,
 	shouldRepeat = false,
 	repeated = false,
 	keyCount = 0,
+	originalLine = '',
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
@@ -94,22 +95,31 @@ define(function (require, exports, module) {
 		}
 	}
 
-	function specialKeyHandle(key) { // return true if handled
-		switch(key){
-			case DEL: deleteRightWord(); break;
-			case BACKSPACE: deleteLeftWord(); break;
-			default: return false;
+	KeyBindingManager.addGlobalKeydownHook(function (e) {
+		if (spaceDown) {
+			if (e.keyCode === BACKSPACE) {
+				moved = true;
+				deleteWord(LEFT);
+				return true;
+			} else if (e.keyCode === DEL) {
+				moved = true;
+				deleteWord(RIGHT);
+				return true;
+			}
 		}
-		return true;
-	}
+		return false;
+	});
 
     document.onkeydown = function (e) {
 		editor = EditorManager.getFocusedEditor();
 		if (!editor) return true;
+		ccm = editor._codeMirror;
+		doc = ccm.getDoc();
 		e = e || window.event;
 
 		if (e.keyCode === 32) { // space down
 			spaceDown = true;
+			originalLine = doc.getLine(doc.getCursor().line);
 			return false;
 		}
 
@@ -150,15 +160,6 @@ define(function (require, exports, module) {
 				return true;
 			}
 		}
-
-		else if (spaceDown && (
-			e.keyCode === BACKSPACE ||
-			e.keyCode === DEL)) {
-			specialKeyHandle(e.keyCode);
-			moved = true;
-			return false;
-		}
-
 		return true;
 	};
 
@@ -204,8 +205,8 @@ define(function (require, exports, module) {
 				 (e.keyCode >= 48 && e.keyCode <= 57) ||
 				 (e.keyCode >= 186 && e.keyCode <= 192) ||
 				 (e.keyCode >= 219 && e.keyCode <= 222)) { // key up
-			if (spaceDown && keyDown && !inserted && !repeated) {
-				command(e.keyCode);
+			if (spaceDown && keyDown && !inserted) {
+				 if (!repeated) command(e.keyCode);
 				moved = true;
 			}
 			if (keyCount < 1) {
