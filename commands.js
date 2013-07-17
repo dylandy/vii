@@ -127,10 +127,6 @@ function testCommand(){
 	insertLineBefore();
 }
 
-function selectWord(){
-
-}
-
 function deleteWord(direction){
 	var cursor = doc.getCursor(),
 		left = doc.getCursor(),
@@ -156,10 +152,6 @@ function deleteWord(direction){
 function deleteLines() {
 	initGlobalArgs();
 	if (!editor) return;
-	if (doc.somethingSelected()) {
-		doc.replaceSelection("");
-		return;
-	}
 	CommandManager.execute('edit.deletelines');
 	ccm.moveV(-1, "line");
 	CodeMirror.commands["goLineEnd"](ccm);
@@ -179,4 +171,32 @@ function deleteToHead() {
 	var head = doc.getCursor().ch;
 	cursorLeft.ch = head;
 	doc.replaceRange("", cursorLeft, cursorRight);
+}
+
+function extendSelection() {
+
+}
+
+function smartSelect() {
+	if (doc.somethingSelected()) return extendSelection();
+	var cursor = doc.getCursor(),
+		token = ccm.getTokenAt(cursor, true);
+	cursor.ch += 1;
+	var rightToken = ccm.getTokenAt(cursor, true);
+	cursor.ch -= 1;
+
+	if (token.string.trim() === '' ||
+	   (token.end - token.start === 1 && rightToken.end - rightToken.start >1)) {
+		moveCursor(RIGHT);
+		var right = doc.getCursor();
+		doc.setSelection(cursor, right);
+	} else {
+		moveCursor(LEFT);
+		var left = doc.getCursor();
+		moveCursor(RIGHT);
+		var right = doc.getCursor();
+		if (right.ch > cursor.ch)
+			doc.setSelection(left, right);
+		else doc.setSelection(left, cursor);
+	}
 }

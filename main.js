@@ -13,7 +13,7 @@ var spaceDown = false,
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
 	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC,
-	BACKSPACE, DEL;
+	BACKSPACE, DEL, SMARTSELECT, SELECTLINE;
 var CommandManager,	EditorManager,	Menus, KeyBindingManager;
 
 define(function (require, exports, module) {
@@ -46,6 +46,8 @@ define(function (require, exports, module) {
 		NEWLINEBEFORE = 222;
 		BACKSPACE = 8;
 		DEL = 46;
+		SMARTSELECT = 84;
+		SELECTLINE = 80;
 	}
 	setColemak();
 
@@ -92,6 +94,8 @@ define(function (require, exports, module) {
 			case LINEUP: CommandManager.execute('edit.lineUp'); break;
 			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
 			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
+			case SMARTSELECT: smartSelect(); break;
+			case SELECTLINE: CommandManager.execute('edit.selectLine'); break;
 		}
 	}
 
