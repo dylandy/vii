@@ -14,7 +14,7 @@ var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
 	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC,
 	BACKSPACE, DEL, SMARTSELECT, SELECTLINE;
-var CommandManager,	EditorManager,	Menus, KeyBindingManager;
+var CommandManager,	EditorManager,	Menus, KeyBindingManager, TokenUtils;
 
 define(function (require, exports, module) {
 	"use strict";
@@ -24,6 +24,7 @@ define(function (require, exports, module) {
 	EditorManager  = brackets.getModule("editor/EditorManager");
 	Menus          = brackets.getModule("command/Menus");
 	KeyBindingManager = brackets.getModule("command/KeyBindingManager");
+	TokenUtils = brackets.getModule("utils/TokenUtils");
 
 	function setColemak() {
 		LEFT = 78;
