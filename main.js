@@ -7,20 +7,25 @@ var spaceDown = false,
 	sameKey = false,
 	shouldRepeat = false,
 	repeated = false,
+	selectExtending = false,
 	keyCount = 0,
 	originalLine = '',
 	editor,	doc, currentCursor,	timer;
 var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
 	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC,
-	BACKSPACE, DEL, SMARTSELECT, SELECTLINE;
-var CommandManager,	EditorManager,	Menus, KeyBindingManager, TokenUtils;
+	BACKSPACE, DEL, SMARTSELECT, SELECTLINE, TOGGLESELECT,
+	SWAPANCHOR, NEXTFILE, PREVFILE, FIND, REPLACE, FINDNEXT, FINDPREV,
+	COPY, PASTE, CUT, UNDO;
+var CM,	EditorManager,	Menus, KeyBindingManager, TokenUtils,
+	Enhancements;
 
 define(function (require, exports, module) {
 	"use strict";
 	require([require.toUrl('./commands.js')]);
+	Enhancements = require([require.toUrl('./enhancement.js')]);
 	console.log("vii is running");
-	CommandManager = brackets.getModule("command/CommandManager");
+	CM = brackets.getModule("command/CommandManager");
 	EditorManager  = brackets.getModule("editor/EditorManager");
 	Menus          = brackets.getModule("command/Menus");
 	KeyBindingManager = brackets.getModule("command/KeyBindingManager");
@@ -39,7 +44,7 @@ define(function (require, exports, module) {
 		DOCEND = 186;
 		UP10 = 76;
 		DOWN10 = 89;
-		CENTER = 67;
+		CENTER = 75;
 		FOCUS = 77;
 		TEST = 49;
 		LINEUP = 87;
@@ -49,6 +54,16 @@ define(function (require, exports, module) {
 		DEL = 46;
 		SMARTSELECT = 84;
 		SELECTLINE = 80;
+		TOGGLESELECT = 68;
+		SWAPANCHOR = 71;
+		FIND = 222;
+		REPLACE = 220;
+		FINDPREV = 219;
+		FINDNEXT = 221;
+		COPY = 67;
+		PASTE = 86;
+		CUT = 88;
+		UNDO = 90;
 	}
 	setColemak();
 
@@ -56,20 +71,25 @@ define(function (require, exports, module) {
 	function dl() { deleteLines(); }
 	function delToTail() { CodeMirror.commands["killLine"](ccm); }
 	function delToHead() { deleteToHead(); }
+	function dup() { duplicateLines(); }
 
-	CommandManager.register("Join Lines", "vii.joinLines", j);
-	CommandManager.register("Delete Lines and Go Up", "vii.deleteLines", dl);
-	CommandManager.register("Delete To Head", "vii.deleteToHead", delToHead);
-	CommandManager.register("Delete To Tail", "vii.deleteToTail", delToTail);
+	CM.register("Duplicate Lines", "vii.duplicateLines", dup);
+	CM.register("Join Lines", "vii.joinLines", j);
+	CM.register("Delete Lines and Go Up", "vii.deleteLines", dl);
+	CM.register("Delete To Head", "vii.deleteToHead", delToHead);
+	CM.register("Delete To Tail", "vii.deleteToTail", delToTail);
 	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 	KeyBindingManager.removeBinding("Cmd-J");
 	KeyBindingManager.removeBinding("Shift-Cmd-D");
 	KeyBindingManager.removeBinding("Ctrl-Cmd-Up");
 	KeyBindingManager.removeBinding("Ctrl-Cmd-Down");
 	KeyBindingManager.removeBinding("Ctrl-Tab");
+	KeyBindingManager.removeBinding("Ctrl-L");
 	KeyBindingManager.removeBinding("Ctrl-Shift-Tab");
+	KeyBindingManager.removeBinding("Cmd-D");
 	KeyBindingManager.addBinding('edit.deletelines','Shift-Delete');
   	menu.addMenuDivider();
+	menu.addMenuItem('vii.duplicateLines', 'Cmd-D');
   	menu.addMenuItem("vii.joinLines", "Ctrl-J");
   	menu.addMenuItem("vii.deleteLines", "Shift-Backspace");
   	menu.addMenuItem("vii.deleteToHead", "Cmd-Backspace");
@@ -92,11 +112,13 @@ define(function (require, exports, module) {
 			case CENTER: centerCursor(); break;
 			case FOCUS: focusAtCenter(); break;
 			case TEST: testCommand(); break;
-			case LINEUP: CommandManager.execute('edit.lineUp'); break;
-			case LINEDOWN: CommandManager.execute('edit.lineDown'); break
+			case LINEUP: CM.execute('edit.lineUp'); break;
+			case LINEDOWN: CM.execute('edit.lineDown'); break
 			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
 			case SMARTSELECT: smartSelect(); break;
-			case SELECTLINE: CommandManager.execute('edit.selectLine'); break;
+			case SELECTLINE: CM.execute('edit.selectLine'); break;
+			case TOGGLESELECT: selectToggle(); break;
+			case SWAPANCHOR: swapAnchor(); break;
 		}
 	}
 
@@ -190,6 +212,8 @@ define(function (require, exports, module) {
 				spaceDown = false;
 				shouldRepeat = false;
 				repeated = false;
+				selectExtending = false;
+				doc.setExtending(false);
 				if (moved) moved = false;
 				else if (keyDown) {
 					insert(" " + lastKey);

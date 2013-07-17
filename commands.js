@@ -21,7 +21,7 @@ function insert(text) {
 
 function moveCursor(direction) {
 	var cursor, token, pos, coords;
-	cursor = doc.getCursor();
+	cursor = doc.getCursor(direction === LEFT ? 'start' : 'end');
 	if (doc.getMode(cursor).name === "null") {
 		if (direction === LEFT)
 			CodeMirror.commands["goGroupLeft"](ccm);
@@ -33,7 +33,7 @@ function moveCursor(direction) {
 		token = ccm.getTokenAt(cursor, true);
 		var spaceCount = countSpacesAtEnd(token.string);
 		if (spaceCount > 0 && cursor.ch === token.end && token.string.trim().length === 0) {
-			doc.setCursor(CodeMirror.Pos(cursor.line, cursor.ch-spaceCount));
+			doc.extendSelection(CodeMirror.Pos(cursor.line, cursor.ch-spaceCount));
 			return;
 		}
 		if (token.string === ' ') {
@@ -49,7 +49,7 @@ function moveCursor(direction) {
 		var x = doc.getLine(cursor.line);
 		if (cursor.ch === 0 && x.substring(0,1) === '\t') {
 			var tabCount = countTabsAtHead(x);
-			doc.setCursor(CodeMirror.Pos(cursor.line, tabCount));
+			doc.extendSelection(CodeMirror.Pos(cursor.line, tabCount));
 			return
 		}
 		cursor.ch += 1;
@@ -64,7 +64,7 @@ function moveCursor(direction) {
 		if (word.line != cursor.line) word.ch = Infinity;
 		pos = CodeMirror.Pos(cursor.line, Math.min(token.end, group.ch, word.ch));
 	}
-	doc.setCursor(pos);
+	doc.extendSelection(pos);
 }
 
 function moveCursor10(up) {
@@ -82,7 +82,7 @@ function focusAtCenter() {
 	var x = scrollInfo.clientWidth/2;
 	var y = scrollInfo.clientHeight/2;
 	var ch = ccm.coordsChar({left:x, top:y});
-	doc.setCursor(ch);
+	doc.extendSelection(ch);
 }
 
 function scroll(up) {
@@ -152,7 +152,7 @@ function deleteWord(direction){
 function deleteLines() {
 	initGlobalArgs();
 	if (!editor) return;
-	CommandManager.execute('edit.deletelines');
+	CM.execute('edit.deletelines');
 	ccm.moveV(-1, "line");
 	CodeMirror.commands["goLineEnd"](ccm);
 	doc.setCursor(doc.getCursor());
@@ -260,4 +260,27 @@ function smartSelect() {
 			doc.setSelection(left, right);
 		else doc.setSelection(left, cursor);
 	}
+}
+
+function selectToggle() {
+	selectExtending = !selectExtending;
+	doc.setExtending(selectExtending);
+}
+
+function swapAnchor() {
+	doc.setSelection(doc.getCursor('head'), doc.getCursor('anchor'));
+}
+
+function duplicateLines() {
+	initGlobalArgs();
+	if (doc.somethingSelected()) {
+		var L = doc.getCursor('start'),
+			R = doc.getCursor('end');
+		L.ch = 0;
+		R.ch = doc.getLine(R.line).length;
+		doc.setSelection(L, R);
+		CM.execute('edit.duplicate');
+		doc.setCursor(R);
+		CodeMirror.commands["newlineAndIndent"](ccm);
+	} else CM.execute('edit.duplicate');
 }
