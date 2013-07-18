@@ -152,7 +152,7 @@ function deleteWord(direction){
 function deleteLines() {
 	initGlobalArgs();
 	if (!editor) return;
-	CM.execute('edit.deletelines');
+	CommandManager.execute('edit.deletelines');
 	ccm.moveV(-1, "line");
 	CodeMirror.commands["goLineEnd"](ccm);
 	doc.setCursor(doc.getCursor());
@@ -281,10 +281,10 @@ function duplicateLines() {
 		L.ch = 0;
 		R.ch = doc.getLine(R.line).length;
 		doc.setSelection(L, R);
-		CM.execute('edit.duplicate');
+		CommandManager.execute('edit.duplicate');
 		doc.setCursor(R);
 		CodeMirror.commands["newlineAndIndent"](ccm);
-	} else CM.execute('edit.duplicate');
+	} else CommandManager.execute('edit.duplicate');
 }
 
 function insertLineBefore() {
