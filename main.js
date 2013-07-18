@@ -15,8 +15,8 @@ var LEFT, RIGHT, UP, DOWN, HOME, END, SCROLLUP, SCROLLDN,
 	DOCHOME, DOCEND, DOWN10, UP10, CENTER, FOCUS, TEST,
 	LINEUP, LINEDOWN, NEWLINEBEFORE, NEXTDOC, PREVDOC,
 	BACKSPACE, DEL, SMARTSELECT, SELECTLINE, TOGGLESELECT,
-	SWAPANCHOR, NEXTFILE, PREVFILE, FIND, REPLACE, FINDNEXT, FINDPREV,
-	COPY, PASTE, CUT, UNDO;
+	SWAPANCHOR, FIND, REPLACE, FINDNEXT, FINDPREV
+	;
 var CM,	EditorManager,	Menus, KeyBindingManager, TokenUtils,
 	Enhancements;
 
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
 		TEST = 49;
 		LINEUP = 87;
 		LINEDOWN = 82;
-		NEWLINEBEFORE = 222;
+		NEWLINEBEFORE = 13;
 		BACKSPACE = 8;
 		DEL = 46;
 		SMARTSELECT = 84;
@@ -60,10 +60,8 @@ define(function (require, exports, module) {
 		REPLACE = 220;
 		FINDPREV = 219;
 		FINDNEXT = 221;
-		COPY = 67;
-		PASTE = 86;
-		CUT = 88;
-		UNDO = 90;
+		NEXTDOC = 48;
+		PREVDOC = 57;
 	}
 	setColemak();
 
@@ -87,7 +85,10 @@ define(function (require, exports, module) {
 	KeyBindingManager.removeBinding("Ctrl-L");
 	KeyBindingManager.removeBinding("Ctrl-Shift-Tab");
 	KeyBindingManager.removeBinding("Cmd-D");
+	KeyBindingManager.removeBinding("Cmd-T");
 	KeyBindingManager.addBinding('edit.deletelines','Shift-Delete');
+	KeyBindingManager.addBinding('navigate.jumptoDefinition','Cmd-T');
+	KeyBindingManager.addBinding('navigate.gotoDefinition','Cmd-2');
   	menu.addMenuDivider();
 	menu.addMenuItem('vii.duplicateLines', 'Cmd-D');
   	menu.addMenuItem("vii.joinLines", "Ctrl-J");
@@ -114,11 +115,16 @@ define(function (require, exports, module) {
 			case TEST: testCommand(); break;
 			case LINEUP: CM.execute('edit.lineUp'); break;
 			case LINEDOWN: CM.execute('edit.lineDown'); break
-			case NEWLINEBEFORE: CodeMirror.commands["killLine"](ccm); break;
 			case SMARTSELECT: smartSelect(); break;
 			case SELECTLINE: CM.execute('edit.selectLine'); break;
 			case TOGGLESELECT: selectToggle(); break;
 			case SWAPANCHOR: swapAnchor(); break;
+			case NEXTDOC: CM.execute('navigate.nextDoc'); break;
+			case PREVDOC: CM.execute('navigate.prevDoc'); break;
+			case FIND: CM.execute('edit.find'); break;
+			case FINDNEXT: CM.execute('edit.findNext'); break;
+			case FINDPREV: CM.execute('edit.findPrevious'); break;
+			case REPLACE: CM.execute('edit.replace'); break;
 		}
 	}
 
@@ -131,6 +137,10 @@ define(function (require, exports, module) {
 			} else if (e.keyCode === DEL) {
 				moved = true;
 				deleteWord(RIGHT);
+				return true;
+			} else if (e.keyCode === 13) {
+				moved = true;
+				insertLineBefore();
 				return true;
 			}
 		}

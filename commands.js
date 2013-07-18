@@ -228,13 +228,15 @@ function extendSelection() {
 		return;
 	} else if (RB.indexOf(Rchar)>=0 && LB.indexOf(Lchar) < 0){
 		goLeft();
+		LC.ch += 1;
 	} else if (RB.indexOf(Rchar)<0 && LB.indexOf(Lchar) >= 0){
 		goRight();
+		RC.ch -= 1;
 	} else {
 		goLeft();
 		goRight();
+		RC.ch -= 1;
 	}
-	RC.ch -= 1;
 	doc.setSelection(LC, RC);
 }
 
@@ -283,4 +285,9 @@ function duplicateLines() {
 		doc.setCursor(R);
 		CodeMirror.commands["newlineAndIndent"](ccm);
 	} else CM.execute('edit.duplicate');
+}
+
+function insertLineBefore() {
+	ccm.moveV(-1, "line");
+	CodeMirror.commands["goLineEnd"](ccm);
 }
