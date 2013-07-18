@@ -1,5 +1,13 @@
 define(function (require, exports, module) {
 return {
+	
+	initGlobalArgs: function(){
+		editor = EditorManager.getFocusedEditor();
+		if (!editor) return;
+		ccm = editor._codeMirror;
+		doc = ccm.getDoc();
+	},
+	
 	CommandManager	: undefined,
 	EditorManager	: undefined,
 	ExtensionUtils	: undefined,
