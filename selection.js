@@ -3,16 +3,16 @@ return {
 	extendSelection: function () {
 		var LB = ['\"', '\'', '(', '[', '{', '/*'],
 			RB = ['\"', '\'', ')', ']', '}', '*/'];
-		var LC = doc.getCursor('start'),
-			RC = doc.getCursor('end');
-		var Lchar = doc.getRange(
+		var LC = C.doc.getCursor('start'),
+			RC = C.doc.getCursor('end');
+		var Lchar = C.doc.getRange(
 			{line: LC.line, ch: LC.ch-1},
 			{line: LC.line, ch: LC.ch});
-		var Rchar = doc.getRange(
+		var Rchar = C.doc.getRange(
 			{line: RC.line, ch: RC.ch},
 			{line: RC.line, ch: RC.ch+1});
-		var L = TokenUtils.getInitialContext(ccm, LC),
-			R = TokenUtils.getInitialContext(ccm, RC);
+		var L = TokenUtils.getInitialContext(C.cm, LC),
+			R = TokenUtils.getInitialContext(C.cm, RC);
 
 		var Rstack = [], Lstack = [];
 		function goLeft() {
@@ -50,7 +50,7 @@ return {
 		}
 
 		if (LB.indexOf(Lchar) >= 0 && LB.indexOf(Lchar) === RB.indexOf(Rchar)) {
-			doc.setSelection({line: LC.line, ch: LC.ch-1}, {line: RC.line, ch: RC.ch+1});
+			C.doc.setSelection({line: LC.line, ch: LC.ch-1}, {line: RC.line, ch: RC.ch+1});
 			return;
 		} else if (RB.indexOf(Rchar)>=0 && LB.indexOf(Lchar) < 0){
 			goLeft();
@@ -63,40 +63,40 @@ return {
 			goRight();
 			RC.ch -= 1;
 		}
-		doc.setSelection(LC, RC);
+		C.doc.setSelection(LC, RC);
 	},
 
 	smartSelect: function () {
-		if (doc.somethingSelected()) return this.extendSelection();
-		var cursor = doc.getCursor(),
-			token = ccm.getTokenAt(cursor, true);
+		if (C.doc.somethingSelected()) return this.extendSelection();
+		var cursor = C.doc.getCursor(),
+			token = C.cm.getTokenAt(cursor, true);
 		cursor.ch += 1;
-		var rightToken = ccm.getTokenAt(cursor, true);
+		var rightToken = C.cm.getTokenAt(cursor, true);
 		cursor.ch -= 1;
 
 		if (token.string.trim() === '' ||
 		   (token.end - token.start === 1 && rightToken.end - rightToken.start >1)) {
 			Cursor.moveCursor(C.RIGHT);
-			var right = doc.getCursor();
-			doc.setSelection(cursor, right);
+			var right = C.doc.getCursor();
+			C.doc.setSelection(cursor, right);
 		} else {
 			Cursor.moveCursor(C.LEFT);
-			var left = doc.getCursor();
+			var left = C.doc.getCursor();
 			Cursor.moveCursor(C.RIGHT);
-			var right = doc.getCursor();
+			var right = C.doc.getCursor();
 			if (right.ch > cursor.ch)
-				doc.setSelection(left, right);
-			else doc.setSelection(left, cursor);
+				C.doc.setSelection(left, right);
+			else C.doc.setSelection(left, cursor);
 		}
 	},
 
 	selectToggle: function () {
 		C.selectExtending = !C.selectExtending;
-		doc.setExtending(C.selectExtending);
+		C.doc.setExtending(C.selectExtending);
 	},
 
 	swapAnchor: function () {
-		doc.setSelection(doc.getCursor('head'), doc.getCursor('anchor'));
+		C.doc.setSelection(C.doc.getCursor('head'), C.doc.getCursor('anchor'));
 	}
 }
 });

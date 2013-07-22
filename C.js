@@ -1,13 +1,19 @@
 define(function (require, exports, module) {
+	"use strict";
+	exports.CommandManager = undefined;
 return {
-	
-	initGlobalArgs: function(){
-		editor = EditorManager.getFocusedEditor();
-		if (!editor) return;
-		ccm = editor._codeMirror;
-		doc = ccm.getDoc();
+	editorReady: function(){
+		this.editor = this.EditorManager.getFocusedEditor();
+		if (!this.editor) return false;
+		this.cm = this.editor._codeMirror;
+		this.doc = this.cm.getDoc();
+		return true;
 	},
-	
+	testObject: function(obj){
+		console.log(obj);
+		obj.xxx = 30;
+		console.log(obj);
+	},
 	CommandManager	: undefined,
 	EditorManager	: undefined,
 	ExtensionUtils	: undefined,
