@@ -16,6 +16,7 @@ define(function (require, exports, module) {
 
 	var reg = C.CommandManager.register,
 		bind = C.KeyBindingManager.addBinding;
+	reg("Toggle Line Comment", "vii.lineComment", Commands.toggleComment);
 	reg("Duplicate Lines", "vii.duplicateLines", Commands.duplicateLines);
 	reg("Join Lines", "vii.joinLines", Commands.joinLines);
 	reg("Delete Lines and Go Up", "vii.deleteLines", Commands.deleteLines);
@@ -24,7 +25,7 @@ define(function (require, exports, module) {
 		CodeMirror.commands["killLine"](C.cm);});
 	["Cmd-J", "Shift-Cmd-D", "Ctrl-Cmd-Up","Ctrl-Cmd-Down",
 	 "Ctrl-Tab", "Ctrl-L", "Ctrl-Shift-Tab","Cmd-D", "Cmd-T",
-	 "Shift-Cmd-Z"].forEach(function(i){
+	 "Shift-Cmd-Z", 'Cmd-/'].forEach(function(i){
 		C.KeyBindingManager.removeBinding(i);});
 	bind('edit.deletelines','Shift-Delete');
 	bind('navigate.jumptoDefinition','Cmd-T');
@@ -33,11 +34,15 @@ define(function (require, exports, module) {
 
 	var menu = C.Menus.getMenu(C.Menus.AppMenuBar.EDIT_MENU);
 	menu.addMenuDivider();
+	menu.addMenuItem('vii.lineComment', 'Cmd-/')
 	menu.addMenuItem('vii.duplicateLines', 'Cmd-D');
-	menu.addMenuItem("vii.joinLines", "Ctrl-J");
-	menu.addMenuItem("vii.deleteLines", "Shift-Backspace");
-	menu.addMenuItem("vii.deleteToHead", "Cmd-Backspace");
-	menu.addMenuItem("vii.deleteToTail", "Cmd-Delete");
+	menu.addMenuItem('vii.joinLines', 'Ctrl-J');
+	menu.addMenuItem('vii.deleteLines', 'Shift-Backspace');
+	menu.addMenuItem('vii.deleteToHead', 'Cmd-Backspace');
+	menu.addMenuItem('vii.deleteToTail', 'Cmd-Delete');
+	['edit.lineUp', 'edit.lineDown', 'edit.selectLine',
+	 'edit.duplicate'].forEach(function(i){
+		menu.removeMenuItem(i);});
 
 	function isKeycodeInRange(keyCode) {
 		if((keyCode >= 65 && keyCode <= 90) ||
@@ -165,10 +170,14 @@ define(function (require, exports, module) {
 				C.doc.setExtending(false);
 				if (moved) moved = false;
 				else if (keyDown) {
-					Commands.insert(" " + lastKey);
+					if (C.doc.somethingSelected())
+						C.doc.replaceSelection(" " + lastKey);
+					else Commands.insert(" " + lastKey);
 					inserted = true;
 				} else {
-					Commands.insert(" ");
+					if (C.doc.somethingSelected())
+						C.doc.replaceSelection(" ");
+					else Commands.insert(" ");
 					inserted = false;
 				}
 				return false;

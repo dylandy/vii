@@ -1,7 +1,9 @@
+//"use strict";
 define({
 	C: undefined,
 	setC: function(c) {
 		C = c;
+//		this.C = c;
 	},
 
 	extendSelection: function () {
@@ -56,10 +58,10 @@ define({
 		if (LB.indexOf(Lchar) >= 0 && LB.indexOf(Lchar) === RB.indexOf(Rchar)) {
 			C.doc.setSelection({line: LC.line, ch: LC.ch-1}, {line: RC.line, ch: RC.ch+1});
 			return;
-		} else if (RB.indexOf(Rchar)>=0 && LB.indexOf(Lchar) < 0){
+		} else if (RB.indexOf(Rchar) >= 0 && LB.indexOf(Lchar) < 0){
 			goLeft();
 			LC.ch += 1;
-		} else if (RB.indexOf(Rchar)<0 && LB.indexOf(Lchar) >= 0){
+		} else if (RB.indexOf(Rchar) < 0 && LB.indexOf(Lchar) >= 0){
 			goRight();
 			RC.ch -= 1;
 		} else {
@@ -79,11 +81,13 @@ define({
 		cursor.ch -= 1;
 
 		if (token.string.trim() === '' ||
-		   (token.end - token.start === 1 && rightToken.end - rightToken.start >1)) {
+		   (token.end - token.start === 1 && rightToken.end - rightToken.start > 1)) {
+			console.log('if');
 			C.Cursor.move(C.RIGHT);
 			var right = C.doc.getCursor();
 			C.doc.setSelection(cursor, right);
 		} else {
+			console.log('else');
 			C.Cursor.move(C.LEFT);
 			var left = C.doc.getCursor();
 			C.Cursor.move(C.RIGHT);

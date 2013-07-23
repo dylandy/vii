@@ -24,6 +24,7 @@ define({
 		this.Cursor = cursor;
 		this.Commands = commands;
 		this.Select = select;
+		C = this;
 	},
 
 	editor			: undefined,

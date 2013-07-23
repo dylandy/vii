@@ -1,7 +1,9 @@
+//"use strict";
 define({
 	C: undefined,
 	setC: function(c, cursor) {
 		C = c;
+//		this.C = c;
 	},
 
 	insert: function(text){
@@ -112,8 +114,9 @@ define({
 		} else C.CommandManager.execute('edit.duplicate');
 	},
 
-	insertLineBefore: function() {
-		C.cm.moveV(-1, "line");
-		CodeMirror.commands["goLineEnd"](C.cm);
+	toggleComment: function() {
+		C.CommandManager.execute('edit.lineComment');
+		if (!C.doc.somethingSelected())
+			C.cm.moveV(1, "line");
 	}
 });

@@ -1,7 +1,9 @@
+//"use strict";
 define({
 	C: undefined,
 	setC: function(c) {
 		C = c;
+//		this.C = c;
 	},
 
 	move: function (direction) {
