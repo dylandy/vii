@@ -1,5 +1,9 @@
-define(function (require, exports, module) {
-return {
+define({
+	C: undefined,
+	setC: function(c) {
+		C = c;
+	},
+
 	extendSelection: function () {
 		var LB = ['\"', '\'', '(', '[', '{', '/*'],
 			RB = ['\"', '\'', ')', ']', '}', '*/'];
@@ -11,13 +15,13 @@ return {
 		var Rchar = C.doc.getRange(
 			{line: RC.line, ch: RC.ch},
 			{line: RC.line, ch: RC.ch+1});
-		var L = TokenUtils.getInitialContext(C.cm, LC),
-			R = TokenUtils.getInitialContext(C.cm, RC);
+		var L = C.TokenUtils.getInitialContext(C.cm, LC),
+			R = C.TokenUtils.getInitialContext(C.cm, RC);
 
 		var Rstack = [], Lstack = [];
 		function goLeft() {
 			while (true) {
-				if (!TokenUtils.movePrevToken(L)) break;
+				if (!C.TokenUtils.movePrevToken(L)) break;
 				if (LB.indexOf(L.token.string) >= 0) {
 					if (Lstack.length === 0) break;
 					else if (Lstack.length > 0 && L.token.string === Lstack[Lstack.length-1]) {
@@ -33,7 +37,7 @@ return {
 		}
 		function goRight(){
 			while (true) {
-				if (!TokenUtils.moveNextToken(R)) break;
+				if (!C.TokenUtils.moveNextToken(R)) break;
 				if (RB.indexOf(R.token.string) >= 0) {
 					if (Rstack.length === 0) break;
 					else if (Rstack.length > 0 && R.token.string === Rstack[Rstack.length-1]) {
@@ -76,13 +80,13 @@ return {
 
 		if (token.string.trim() === '' ||
 		   (token.end - token.start === 1 && rightToken.end - rightToken.start >1)) {
-			Cursor.moveCursor(C.RIGHT);
+			C.Cursor.move(C.RIGHT);
 			var right = C.doc.getCursor();
 			C.doc.setSelection(cursor, right);
 		} else {
-			Cursor.moveCursor(C.LEFT);
+			C.Cursor.move(C.LEFT);
 			var left = C.doc.getCursor();
-			Cursor.moveCursor(C.RIGHT);
+			C.Cursor.move(C.RIGHT);
 			var right = C.doc.getCursor();
 			if (right.ch > cursor.ch)
 				C.doc.setSelection(left, right);
@@ -98,5 +102,4 @@ return {
 	swapAnchor: function () {
 		C.doc.setSelection(C.doc.getCursor('head'), C.doc.getCursor('anchor'));
 	}
-}
 });

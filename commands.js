@@ -1,8 +1,7 @@
-define(function (require, exports, module) {
-	var C;
-return {
-	setC:function(cc){
-		C=cc;
+define({
+	C: undefined,
+	setC: function(c, cursor) {
+		C = c;
 	},
 
 	insert: function(text){
@@ -15,17 +14,20 @@ return {
 	},
 
 	scroll: function(up){
-		if (intervalID) intervalID = clearInterval(intervalID);
-		globalUp = up;
-		C.cm.scrollTo(null, globalUp ? C.cm.getScrollInfo().top-60 : C.cm.getScrollInfo().top+60);
-		globalCounter = 60;
-		intervalID = setInterval("C.cm.scrollTo(null, globalUp ? C.cm.getScrollInfo().top-globalCounter : C.cm.getScrollInfo().top+globalCounter); globalCounter-=5; if(globalCounter<2) intervalID = clearInterval(intervalID);", 10);
+		if (window.intervalID) window.intervalID = clearInterval(window.intervalID);
+		window.globalUp = up;
+		C.cm.scrollTo(null, window.globalUp ? C.cm.getScrollInfo().top-60 : C.cm.getScrollInfo().top+60);
+		window.globalCounter = 60;
+		window.intervalID = setInterval("C.cm.scrollTo(null, window.globalUp ? " +
+			"C.cm.getScrollInfo().top-window.globalCounter : " +
+			"C.cm.getScrollInfo().top+window.globalCounter);" +
+			"window.globalCounter-=5;" +
+			"if(window.globalCounter<2)"+
+			"window.intervalID = clearInterval(window.intervalID);", 10);
 	},
 
 	joinLines: function(){
-		C.initGlobalArgs();
-		if (!C.editor) return true;
-
+		if (!C.editorReady()) return true;
 		if (C.doc.somethingSelected()) {
 			var splitted = C.doc.getSelection().split("\n"),
 				result = "";
@@ -53,21 +55,21 @@ return {
 	},
 
 	deleteWord: function(direction) {
-		var cursor = C.doc.getCursor(),
-			left = C.doc.getCursor(),
-			right = C.doc.getCursor();
+		var cursor 	= C.doc.getCursor(),
+			left 	= C.doc.getCursor(),
+			right	= C.doc.getCursor();
 		if (C.doc.somethingSelected())
 			C.doc.replaceSelection("");
-		else if (direction === LEFT) {
-			moveCursor(LEFT);
+		else if (direction === C.LEFT) {
+			C.Cursor.move(C.LEFT);
 			left.ch = C.doc.getCursor().ch;
-			moveCursor(RIGHT);
+			C.Cursor.move(C.RIGHT);
 			right.ch = C.doc.getCursor().ch;
 			if (right.ch < cursor.ch) right = cursor;
-		} else if (direction === RIGHT) {
-			moveCursor(RIGHT);
+		} else if (direction === C.RIGHT) {
+			C.Cursor.move(C.RIGHT);
 			right.ch = C.doc.getCursor().ch;
-			moveCursor(LEFT);
+			C.Cursor.move(C.LEFT);
 			left.ch = C.doc.getCursor().ch;
 			if (left.ch > cursor.ch) left = cursor;
 		}
@@ -75,17 +77,15 @@ return {
 	},
 
 	deleteLines: function() {
-		C.initGlobalArgs();
-		if (!C.editor) return;
-		CommandManager.execute('edit.deletelines');
+		if (!C.editorReady()) return;
+		C.CommandManager.execute('edit.deletelines');
 		C.cm.moveV(-1, "line");
 		CodeMirror.commands["goLineEnd"](C.cm);
 		C.doc.setCursor(C.doc.getCursor());
 	},
 
 	deleteToHead: function() {
-		C.initGlobalArgs();
-		if (!C.editor) return;
+		if (!C.editorReady()) return;
 		if (C.doc.somethingSelected()) {
 			C.doc.replaceSelection("");
 			return;
@@ -99,21 +99,21 @@ return {
 	},
 
 	duplicateLines: function() {
-		C.initGlobalArgs();
+		if (!C.editorReady()) return;
 		if (C.doc.somethingSelected()) {
 			var L = C.doc.getCursor('start'),
 				R = C.doc.getCursor('end');
 			L.ch = 0;
 			R.ch = C.doc.getLine(R.line).length;
 			C.doc.setSelection(L, R);
-			CommandManager.execute('edit.duplicate');
+			C.CommandManager.execute('edit.duplicate');
 			C.doc.setCursor(R);
 			CodeMirror.commands["newlineAndIndent"](C.cm);
-		} else CommandManager.execute('edit.duplicate');
+		} else C.CommandManager.execute('edit.duplicate');
 	},
 
 	insertLineBefore: function() {
 		C.cm.moveV(-1, "line");
 		CodeMirror.commands["goLineEnd"](C.cm);
 	}
-}});
+});

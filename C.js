@@ -1,7 +1,11 @@
-define(function (require, exports, module) {
-	"use strict";
-	exports.CommandManager = undefined;
-return {
+//"use strict";
+define({
+	CommandManager 	: brackets.getModule("command/CommandManager"),
+	EditorManager	: brackets.getModule("editor/EditorManager"),
+	ExtensionUtils	: brackets.getModule("utils/ExtensionUtils"),
+	KeyBindingManager : brackets.getModule("command/KeyBindingManager"),
+	Menus         	: brackets.getModule("command/Menus"),
+	TokenUtils : brackets.getModule("utils/TokenUtils"),
 	editorReady: function(){
 		this.editor = this.EditorManager.getFocusedEditor();
 		if (!this.editor) return false;
@@ -9,20 +13,18 @@ return {
 		this.doc = this.cm.getDoc();
 		return true;
 	},
-	testObject: function(obj){
-		console.log(obj);
-		obj.xxx = 30;
-		console.log(obj);
-	},
-	CommandManager	: undefined,
-	EditorManager	: undefined,
-	ExtensionUtils	: undefined,
-	KeyBindingManager:undefined,
-	Menus			: undefined,
-	TokenUtils		: undefined,
 
 	selectExtending	: false,
 	originalLine	: '',
+
+	Cursor	: undefined,
+	Commands: undefined,
+	Select	: undefined,
+	setUp	: function(cursor, commands, select) {
+		this.Cursor = cursor;
+		this.Commands = commands;
+		this.Select = select;
+	},
 
 	editor			: undefined,
 	doc				: undefined,
@@ -43,14 +45,14 @@ return {
 	BACKSPACE		: 0,		DEL			: 0,
 	FIND			: 0,		REPLACE		: 0,
 	FINDNEXT		: 0,		FINDPREV	: 0,
-	MULTICURSOR		: 0,
-	NEWLINEBEFORE	: 0,		TEST		: 0,
+	MULTICURSOR		: 0,		SPACE		: 32,
+	NEWLINEBEFORE	: 0,		ENTER		: 13,
 
 	setColemak: function() {
-		with(this) {
+		with(this){
 			LEFT			= 78;		RIGHT		= 73;
 			UP				= 85;		DOWN		= 69;
-			CENTER			= 75;		FOCUS		= 77;
+			CENTER			= 67;		FOCUS		= 77;
 			UP10			= 76;		DOWN10		= 89;
 			HOME			= 72;		END			= 79;
 			DOCHOME			= 74;		DOCEND		= 186;
@@ -63,9 +65,7 @@ return {
 			FIND			= 222;		REPLACE		= 220;
 			FINDNEXT		= 221;		FINDPREV	= 219;
 			MULTICURSOR		= 65;
-			NEWLINEBEFORE	= 13;		TEST		= 49;
+			NEWLINEBEFORE	= 13;
 		}
 	}
-
-}
 });

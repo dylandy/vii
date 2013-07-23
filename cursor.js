@@ -1,7 +1,10 @@
-define(function (require, exports, module) {
-return {
+define({
+	C: undefined,
+	setC: function(c) {
+		C = c;
+	},
 
-	moveCursor: function (direction) {
+	move: function (direction) {
 		function countSpacesAtEnd(str) {
 			var i = str.length - 1;
 			while(i >= 0 && str.substr(i, 1) === ' ') i -= 1;
@@ -12,7 +15,6 @@ return {
 			while(i < str.length && str.substr(i, 1) === '\t') i += 1;
 			return i;
 		}
-
 		var cursor, token, pos, coords;
 		cursor = C.doc.getCursor(direction === C.LEFT ? 'start' : 'end');
 		if (C.doc.getMode(cursor).name === "null") {
@@ -60,7 +62,7 @@ return {
 		C.doc.extendSelection(pos);
 	},
 
-	moveCursor10: function (up) {
+	move10: function (up) {
 		for(var i = 0; i < 5; i++)
 			C.cm.moveV(up ? -1 : 1, "line");
 	},
@@ -72,5 +74,4 @@ return {
 		var ch = C.cm.coordsChar({left:x, top:y});
 		C.doc.extendSelection(ch);
 	}
-}
 });
