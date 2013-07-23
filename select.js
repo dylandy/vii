@@ -6,6 +6,22 @@ define({
 //		this.C = c;
 	},
 
+	line: function () {
+		function countTabsAtHead(str) {
+			var i = 0;
+			while(i < str.length && str.substr(i, 1) === '\t') i += 1;
+			return i;
+		}
+		C.CommandManager.execute('edit.selectLine')
+		var sel = C.doc.getSelection(),
+			head = C.doc.getCursor('start'),
+			tail = C.doc.getCursor('end');
+		head.ch += countTabsAtHead(sel);
+		tail.line -= 1;
+		tail.ch = C.doc.getLine(tail.line).length;
+		C.doc.setSelection(head, tail);
+	},
+
 	extendSelection: function () {
 		var LB = ['\"', '\'', '(', '[', '{', '/*'],
 			RB = ['\"', '\'', ')', ']', '}', '*/'];
@@ -23,7 +39,6 @@ define({
 		var Rstack = [], Lstack = [];
 		function goLeft() {
 			while (true) {
-				if (!C.TokenUtils.movePrevToken(L)) break;
 				if (LB.indexOf(L.token.string) >= 0) {
 					if (Lstack.length === 0) break;
 					else if (Lstack.length > 0 && L.token.string === Lstack[Lstack.length-1]) {
@@ -35,6 +50,7 @@ define({
 				} else if (RB.indexOf(L.token.string) >= 0) {
 					Lstack.push(LB[RB.indexOf(L.token.string)]);
 				}
+				if (!C.TokenUtils.movePrevToken(L)) break;
 			}
 		}
 		function goRight(){
@@ -60,7 +76,6 @@ define({
 			return;
 		} else if (RB.indexOf(Rchar) >= 0 && LB.indexOf(Lchar) < 0){
 			goLeft();
-			LC.ch += 1;
 		} else if (RB.indexOf(Rchar) < 0 && LB.indexOf(Lchar) >= 0){
 			goRight();
 			RC.ch -= 1;
@@ -73,6 +88,7 @@ define({
 	},
 
 	smartSelect: function () {
+		var B = ['\"', '\'', '(', '[', '{', '/*', ')', ']', '}', '*/'];
 		if (C.doc.somethingSelected()) return this.extendSelection();
 		var cursor = C.doc.getCursor(),
 			token = C.cm.getTokenAt(cursor, true);
@@ -81,13 +97,20 @@ define({
 		cursor.ch -= 1;
 
 		if (token.string.trim() === '' ||
-		   (token.end - token.start === 1 && rightToken.end - rightToken.start > 1)) {
-			console.log('if');
-			C.Cursor.move(C.RIGHT);
-			var right = C.doc.getCursor();
-			C.doc.setSelection(cursor, right);
+		    (token.end - token.start === 1 && rightToken.end - rightToken.start > 1) ||
+//			(token.string.length > 1) ||
+		    (B.indexOf(token.string) >= 0 && B.indexOf(rightToken.string) < 0)) {
+			if(cursor.ch === token.end && token.string.length > 1) {
+				C.Cursor.move(C.LEFT);
+				var left = C.doc.getCursor();
+				C.doc.setSelection(left, cursor);
+			} else {
+				C.Cursor.move(C.RIGHT);
+				var right = C.doc.getCursor();
+				C.doc.setSelection(cursor, right);
+			}
 		} else {
-			console.log('else');
+//			console.log('else');
 			C.Cursor.move(C.LEFT);
 			var left = C.doc.getCursor();
 			C.Cursor.move(C.RIGHT);

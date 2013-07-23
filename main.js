@@ -78,7 +78,7 @@ define(function (require, exports, module) {
 			case C.LINEUP:		exe('edit.lineUp');			break;
 			case C.LINEDOWN:	exe('edit.lineDown');		break;
 			case C.SMARTSELECT: Select.smartSelect();		break;
-			case C.SELECTLINE: 	exe('edit.selectLine');		break;
+			case C.SELECTLINE: 	Select.line();				break;
 			case C.TOGGLESELECT:Select.selectToggle();		break;
 			case C.SWAPANCHOR: 	Select.swapAnchor();		break;
 			case C.NEXTDOC:		exe('navigate.nextDoc');	break;

@@ -53,7 +53,6 @@ define({
 	insertLineBefore: function() {
 		C.cm.moveV(-1, "line");
 		CodeMirror.commands["goLineEnd"](C.cm);
-		CodeMirror.commands["newlineAndIndent"](C.cm);
 	},
 
 	deleteWord: function(direction) {
