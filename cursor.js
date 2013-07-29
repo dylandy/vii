@@ -24,7 +24,7 @@ define(function (require, exports, module) {
 		if (C.doc.getMode(cursor).name === "null") {
 			if (direction === C.LEFT)
 				CodeMirror.commands["goGroupLeft"](C.cm);
-			else if (direction === RIGHT)
+			else if (direction === C.RIGHT)
 				CodeMirror.commands["goGroupRight"](C.cm);
 			return;
 		}
