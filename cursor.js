@@ -1,12 +1,11 @@
-//"use strict";
-define({
-	C: undefined,
-	setC: function(c) {
+define(function (require, exports, module) {
+	"use strict";
+	var C;
+	exports.setC = function (c) {
 		C = c;
-//		this.C = c;
-	},
+	};
 
-	move: function (direction) {
+	exports.move = function (direction) {
 		function countSpacesAtEnd(str) {
 			var i = str.length - 1;
 			while(i >= 0 && str.substr(i, 1) === ' ') i -= 1;
@@ -18,7 +17,10 @@ define({
 			return i;
 		}
 		var cursor, token, pos, coords;
-		cursor = C.doc.getCursor(direction === C.LEFT ? 'start' : 'end');
+		if (C.selectExtending)
+			cursor = C.doc.getCursor('head');
+		else
+			cursor = C.doc.getCursor(direction === C.LEFT ? 'start' : 'end');
 		if (C.doc.getMode(cursor).name === "null") {
 			if (direction === C.LEFT)
 				CodeMirror.commands["goGroupLeft"](C.cm);
@@ -36,6 +38,7 @@ define({
 			if (token.string === ' ') {
 				cursor.ch -= 1;
 				token = C.cm.getTokenAt(cursor, true);
+				cursor.ch += 1;
 			}
 			var group = C.cm.findPosH(cursor, -1, 'group');
 			var word = C.cm.findPosH(cursor, -1, 'word');
@@ -51,10 +54,13 @@ define({
 			}
 			cursor.ch += 1;
 			token = C.cm.getTokenAt(cursor, true);
+//			console.log(token)
 			if (token.string === ' ') {
 				cursor.ch += 1;
 				token = C.cm.getTokenAt(cursor, true);
+				cursor.ch -= 1;
 			}
+			cursor.ch -= 1;
 			group = C.cm.findPosH(cursor, 1, 'group');
 			word = C.cm.findPosH(cursor, 1, 'word');
 			if (group.line != cursor.line) group.ch = Infinity;
@@ -62,14 +68,14 @@ define({
 			pos = CodeMirror.Pos(cursor.line, Math.min(token.end, group.ch, word.ch));
 		}
 		C.doc.extendSelection(pos);
-	},
+	};
 
-	move10: function (up) {
+	exports.move10 = function (up) {
 		for(var i = 0; i < 5; i++)
 			C.cm.moveV(up ? -1 : 1, "line");
 	},
 
-	focusAtCenter: function () {
+	exports.focusAtCenter = function () {
 		var scrollInfo = C.cm.getScrollInfo();
 		var x = scrollInfo.clientWidth/2;
 		var y = scrollInfo.clientHeight/2;

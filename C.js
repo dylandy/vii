@@ -1,72 +1,65 @@
-//"use strict";
-define({
-	CommandManager 	: brackets.getModule("command/CommandManager"),
-	EditorManager	: brackets.getModule("editor/EditorManager"),
-	ExtensionUtils	: brackets.getModule("utils/ExtensionUtils"),
-	KeyBindingManager : brackets.getModule("command/KeyBindingManager"),
-	Menus         	: brackets.getModule("command/Menus"),
-	TokenUtils : brackets.getModule("utils/TokenUtils"),
-	editorReady: function(){
-		this.editor = this.EditorManager.getFocusedEditor();
-		if (!this.editor) return false;
-		this.cm = this.editor._codeMirror;
-		this.doc = this.cm.getDoc();
+define(function (require, exports, module) {
+	"use strict";
+	exports.CommandManager 		= brackets.getModule("command/CommandManager");
+	exports.EditorManager		= brackets.getModule("editor/EditorManager");
+	exports.ExtensionUtils		= brackets.getModule("utils/ExtensionUtils");
+	exports.KeyBindingManager	= brackets.getModule("command/KeyBindingManager");
+	exports.Menus         		= brackets.getModule("command/Menus");
+	exports.TokenUtils 			= brackets.getModule("utils/TokenUtils");
+	exports.selectExtending		= false;
+	exports.originalLine		= '';
+	exports.Cursor				= require('cursor');
+	exports.Commands			= require('commands');
+	exports.Find				= require('find');
+	exports.Select				= require('select');
+	exports.selectExtending		= false;
+	exports.originalLine		= '';
+	exports.currentCursor		= undefined;
+	exports.timer				= undefined;
+
+	function editorReady () {
+		exports.editor = exports.EditorManager.getFocusedEditor();
+		if (!exports.editor) return false;
+		exports.cm = exports.editor._codeMirror;
+		exports.doc = exports.cm.getDoc();
 		return true;
-	},
+	} exports.editorReady = editorReady;
 
-	selectExtending	: false,
-	originalLine	: '',
+	function setColemak() {
+		exports.LEFT			= 78;		exports.RIGHT		= 73;
+		exports.UP				= 85;		exports.DOWN		= 69;
+		exports.CENTER			= 67;		exports.FOCUS		= 77;
+		exports.UP10			= 76;		exports.DOWN10		= 89;
+		exports.HOME			= 72;		exports.END			= 79;
+		exports.DOCHOME			= 74;		exports.DOCEND		= 186;
+		exports.SCROLLUP		= 70;		exports.SCROLLDN	= 83;
+		exports.LINEUP			= 87;		exports.LINEDOWN	= 82;
+		exports.NEXTDOC			= 48;		exports.PREVDOC		= 57;
+		exports.SMARTSELECT		= 84;		exports.SELECTLINE	= 80;
+		exports.TOGGLESELECT	= 68;		exports.SWAPANCHOR	= 71;
+		exports.BACKSPACE		= 8;		exports.DEL			= 46;
+		exports.FIND			= 222;		exports.REPLACE		= 220;
+		exports.FINDNEXT		= 221;		exports.FINDPREV	= 219;
+		exports.MULTICURSOR		= 65;		exports.SPACE		= 32;
+		exports.NEWLINEBEFORE	= 13;		exports.ENTER		= 13;
+	} exports.setColemak = setColemak;
 
-	Cursor	: undefined,
-	Commands: undefined,
-	Select	: undefined,
-	setUp	: function(cursor, commands, select) {
-		this.Cursor = cursor;
-		this.Commands = commands;
-		this.Select = select;
-		C = this;
-	},
-
-	editor			: undefined,
-	doc				: undefined,
-	currentCursor	: undefined,
-	timer			: undefined,
-
-	LEFT			: 0,		RIGHT		: 0,
-	UP				: 0,		DOWN		: 0,
-	CENTER			: 0,		FOCUS		: 0,
-	UP10			: 0,		DOWN10		: 0,
-	HOME			: 0,		END			: 0,
-	DOCHOME			: 0,		DOCEND		: 0,
-	SCROLLUP		: 0,		SCROLLDN	: 0,
-	LINEUP			: 0,		LINEDOWN	: 0,
-	NEXTDOC			: 0,		PREVDOC		: 0,
-	SMARTSELECT		: 0,		SELECTLINE	: 0,
-	TOGGLESELECT	: 0,		SWAPANCHOR	: 0,
-	BACKSPACE		: 0,		DEL			: 0,
-	FIND			: 0,		REPLACE		: 0,
-	FINDNEXT		: 0,		FINDPREV	: 0,
-	MULTICURSOR		: 0,		SPACE		: 32,
-	NEWLINEBEFORE	: 0,		ENTER		: 13,
-
-	setColemak: function() {
-		with(this){
-			LEFT			= 78;		RIGHT		= 73;
-			UP				= 85;		DOWN		= 69;
-			CENTER			= 67;		FOCUS		= 77;
-			UP10			= 76;		DOWN10		= 89;
-			HOME			= 72;		END			= 79;
-			DOCHOME			= 74;		DOCEND		= 186;
-			SCROLLUP		= 70;		SCROLLDN	= 83;
-			LINEUP			= 87;		LINEDOWN	= 82;
-			NEXTDOC			= 48;		PREVDOC		= 57;
-			SMARTSELECT		= 84;		SELECTLINE	= 80;
-			TOGGLESELECT	= 68;		SWAPANCHOR	= 71;
-			BACKSPACE		= 8;		DEL			= 46;
-			FIND			= 222;		REPLACE		= 220;
-			FINDNEXT		= 221;		FINDPREV	= 219;
-			MULTICURSOR		= 65;
-			NEWLINEBEFORE	= 13;
-		}
-	}
+	function setQwerty() {
+		exports.LEFT			= 74;		exports.RIGHT		= 76;
+		exports.UP				= 73;		exports.DOWN		= 75;
+		exports.CENTER			= 67;		exports.FOCUS		= 77;
+		exports.UP10			= 85;		exports.DOWN10		= 79;
+		exports.HOME			= 72;		exports.END			= 186;
+		exports.DOCHOME			= 89;		exports.DOCEND		= 80;
+		exports.SCROLLUP		= 69;		exports.SCROLLDN	= 68;
+		exports.LINEUP			= 87;		exports.LINEDOWN	= 83;
+		exports.NEXTDOC			= 48;		exports.PREVDOC		= 57;
+		exports.SMARTSELECT		= 70;		exports.SELECTLINE	= 82;
+		exports.TOGGLESELECT	= 71;		exports.SWAPANCHOR	= 84;
+		exports.BACKSPACE		= 8;		exports.DEL			= 46;
+		exports.FIND			= 222;		exports.REPLACE		= 220;
+		exports.FINDNEXT		= 221;		exports.FINDPREV	= 219;
+		exports.MULTICURSOR		= 65;		exports.SPACE		= 32;
+		exports.NEWLINEBEFORE	= 13;		exports.ENTER		= 13;
+	} exports.setQwerty = setQwerty;
 });

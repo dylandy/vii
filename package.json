@@ -1,7 +1,7 @@
 {
     "name": "vii.",
     "title": "Vii",
-    "description": "Full keyboard editing like vi but using a easier-to-remember hotkey scheme.",
+    "description": "Full keyboard editing plugin for Brackets.",
     "homepage": "https://github.com/red8012/vii",
     "version": "1.0.0",
     "author": "Chen, Yu-Ann <red8012@gmail.com> ()",

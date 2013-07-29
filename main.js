@@ -3,40 +3,36 @@ define(function (require, exports, module) {
 	var spaceDown = false, keyDown = false,	inserted = false,
 		moved = false, sameKey = false, shouldRepeat = false,
 		repeated = false, lastKey = '', keyCount = 0,
-		C 		= require('C'),
-		Commands= require('commands'),
-		Cursor	= require('cursor'),
-		Select	= require('select');
-
-	Commands.setC(C);
-	Cursor.setC(C);
-	Select.setC(C);
-	C.setUp(Cursor, Commands, Select);
+		C 		= require('C');
+	C.Commands.setC(C);
+	C.Cursor.setC(C);
+	C.Select.setC(C);
 	C.ExtensionUtils.loadStyleSheet(module, './style.css');
 
 	var reg = C.CommandManager.register,
 		bind = C.KeyBindingManager.addBinding;
-	reg("Toggle Line Comment", "vii.lineComment", Commands.toggleComment);
-	reg("Duplicate Lines", "vii.duplicateLines", Commands.duplicateLines);
-	reg("Join Lines", "vii.joinLines", Commands.joinLines);
-	reg("Delete Lines and Go Up", "vii.deleteLines", Commands.deleteLines);
-	reg("Delete To Head", "vii.deleteToHead", Commands.deleteToHead);
+	reg("Toggle Line Comment", "vii.lineComment", C.Commands.toggleComment);
+	reg("Duplicate Lines", "vii.duplicateLines", C.Commands.duplicateLines);
+	reg("Join Lines", "vii.joinLines", C.Commands.joinLines);
+	reg("Delete Lines and Go Up", "vii.deleteLines", C.Commands.deleteLines);
+	reg("Delete To Head", "vii.deleteToHead", C.Commands.deleteToHead);
 	reg("Delete To Tail", "vii.deleteToTail", function(){
 		CodeMirror.commands["killLine"](C.cm);});
 	["Cmd-J", "Shift-Cmd-D", "Ctrl-Cmd-Up","Ctrl-Cmd-Down",
 	 "Ctrl-Tab", "Ctrl-L", "Ctrl-Shift-Tab","Cmd-D", "Cmd-T",
-	 "Shift-Cmd-Z", 'Cmd-/'].forEach(function(i){
+	 "Shift-Cmd-Z", 'Cmd-/', 'Cmd-L'].forEach(function(i){
 		C.KeyBindingManager.removeBinding(i);});
 	bind('edit.deletelines','Shift-Delete');
 	bind('navigate.jumptoDefinition','Cmd-T');
 	bind('navigate.gotoDefinition','Cmd-2');
+	bind('navigate.gotoLine','Cmd-3');
 	bind('edit.redo','Cmd-Y');
 
 	var menu = C.Menus.getMenu(C.Menus.AppMenuBar.EDIT_MENU);
 	menu.addMenuDivider();
 	menu.addMenuItem('vii.lineComment', 'Cmd-/')
 	menu.addMenuItem('vii.duplicateLines', 'Cmd-D');
-	menu.addMenuItem('vii.joinLines', 'Ctrl-J');
+	menu.addMenuItem('vii.joinLines', 'Cmd-J');
 	menu.addMenuItem('vii.deleteLines', 'Shift-Backspace');
 	menu.addMenuItem('vii.deleteToHead', 'Cmd-Backspace');
 	menu.addMenuItem('vii.deleteToTail', 'Cmd-Delete');
@@ -62,41 +58,41 @@ define(function (require, exports, module) {
 		}
 		switch(key){
 			case C.LEFT:
-			case C.RIGHT:		Cursor.move(key);			break;
+			case C.RIGHT:		C.Cursor.move(key);			break;
 			case C.UP:			C.cm.moveV(-1, "line"); 	break;
 			case C.DOWN:		C.cm.moveV(1, "line");		break;
 			case C.HOME:		cmd("goLineStartSmart");	break;
 			case C.END:			cmd("goLineEnd");			break;
-			case C.SCROLLUP:	Commands.scroll(true);		break;
-			case C.SCROLLDN:	Commands.scroll(false); 	break;
+			case C.SCROLLUP:	C.Commands.scroll(true);		break;
+			case C.SCROLLDN:	C.Commands.scroll(false); 	break;
 			case C.DOCHOME:		cmd("goDocStart");			break;
 			case C.DOCEND:		cmd("goDocEnd");			break;
-			case C.UP10:		Cursor.move10(true);		break;
-			case C.DOWN10:		Cursor.move10(false); 		break;
-			case C.CENTER:		Commands.centerCursor();	break;
-			case C.FOCUS:		Cursor.focusAtCenter(); 	break;
+			case C.UP10:		C.Cursor.move10(true);		break;
+			case C.DOWN10:		C.Cursor.move10(false); 		break;
+			case C.CENTER:		C.Commands.centerCursor();	break;
+			case C.FOCUS:		C.Cursor.focusAtCenter(); 	break;
 			case C.LINEUP:		exe('edit.lineUp');			break;
 			case C.LINEDOWN:	exe('edit.lineDown');		break;
-			case C.SMARTSELECT: Select.smartSelect();		break;
-			case C.SELECTLINE: 	Select.line();				break;
-			case C.TOGGLESELECT:Select.selectToggle();		break;
-			case C.SWAPANCHOR: 	Select.swapAnchor();		break;
+			case C.SMARTSELECT: C.Select.smartSelect();		break;
+			case C.SELECTLINE: 	C.Select.line();				break;
+			case C.TOGGLESELECT:C.Select.selectToggle();		break;
+			case C.SWAPANCHOR: 	C.Select.swapAnchor();		break;
 			case C.NEXTDOC:		exe('navigate.nextDoc');	break;
 			case C.PREVDOC:		exe('navigate.prevDoc');	break;
 			case C.FIND:		exe('edit.find'); 			break;
 			case C.FINDNEXT:	exe('edit.findNext'); 		break;
 			case C.FINDPREV:	exe('edit.findPrevious'); 	break;
 			case C.REPLACE: 	exe('edit.replace');		break;
-			case C.MULTICURSOR: 							break;
+			case C.MULTICURSOR: console.log(Test.nn++);	break;
 		}
 	}
 
 	C.KeyBindingManager.addGlobalKeydownHook(function (e) {
 		if (spaceDown) {
 			switch(e.keyCode) {
-				case C.BACKSPACE: Commands.deleteWord(C.LEFT); break;
-				case C.DEL: Commands.deleteWord(C.RIGHT); break;
-				case C.ENTER: Commands.insertLineBefore(); break;//Todo: c.enter
+				case C.BACKSPACE: C.Commands.deleteWord(C.LEFT); break;
+				case C.DEL: C.Commands.deleteWord(C.RIGHT); break;
+				case C.ENTER: C.Commands.insertLineBefore(); break;//Todo: c.enter
 				default: return false;
 			}
 			moved = true;
@@ -108,13 +104,11 @@ define(function (require, exports, module) {
     document.onkeydown = function (e) {
 		if(!C.editorReady()) return true;
 		e = e || window.event;
-
 		if (e.keyCode === C.SPACE) { // space down
 			spaceDown = true;
 			C.originalLine = C.doc.getLine(C.doc.getCursor().line);
 			return false;
 		}
-
 		else if (isKeycodeInRange(e.keyCode)) { // key down
 			var k;
 			switch(e.keyCode){
@@ -172,12 +166,12 @@ define(function (require, exports, module) {
 				else if (keyDown) {
 					if (C.doc.somethingSelected())
 						C.doc.replaceSelection(" " + lastKey);
-					else Commands.insert(" " + lastKey);
+					else C.Commands.insert(" " + lastKey);
 					inserted = true;
 				} else {
 					if (C.doc.somethingSelected())
 						C.doc.replaceSelection(" ");
-					else Commands.insert(" ");
+					else C.Commands.insert(" ");
 					inserted = false;
 				}
 				return false;
@@ -203,6 +197,6 @@ define(function (require, exports, module) {
 		return true;
 	}
 
-	C.setColemak();
+	C.setQwerty();
 	console.log("vii is running");
 });
