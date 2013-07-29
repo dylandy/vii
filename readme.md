@@ -7,7 +7,7 @@ This plug-in is under pre-alpha stage, it may or may not function as expected. S
 ### How to Install
 1. Select **Brackets > File > Extension Manager...**
 2. Click on **Install from URL...**
-3. Paste **https://github.com/red8012/vii** into Extension URL field.
+3. Paste **https://github.com/dylandy/vii** into Extension URL field.
 4. Click on the **Install** button.
 
 ### How to Use
@@ -61,6 +61,8 @@ Here are some other very useful hotkeys:
 | Cmd-D | Duplicate the current line or the selected lines. |
 | Cmd-J | Join lines. Same as Cmd-J in Sublime Text. |
 
+### Known Issue
+1.windows 8 version Bracket might fail to install.
 
 ### License
 GNU GENERAL PUBLIC LICENSE Version 3 -- see `LICENSE` for details.
