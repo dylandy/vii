@@ -61,6 +61,8 @@ Here are some other very useful hotkeys:
 | Cmd-D | Duplicate the current line or the selected lines. |
 | Cmd-J | Join lines. Same as Cmd-J in Sublime Text. |
 
+### Known Issue
+1.windows 8 version Bracket might fail to install.
 
 ### License
 GNU GENERAL PUBLIC LICENSE Version 3 -- see `LICENSE` for details.
