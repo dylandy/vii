@@ -3,14 +3,14 @@ define(function (require, exports, module) {
 	var spaceDown = false, keyDown = false,	inserted = false,
 		moved = false, sameKey = false, shouldRepeat = false,
 		repeated = false, lastKey = '', keyCount = 0,
-		C 		= require('C');
+	C 		= require('C');
 	C.Commands.setC(C);
 	C.Cursor.setC(C);
 	C.Select.setC(C);
 	C.ExtensionUtils.loadStyleSheet(module, './style.css');
 
 	var reg = C.CommandManager.register,
-		bind = C.KeyBindingManager.addBinding;
+	bind = C.KeyBindingManager.addBinding;
 	reg("Toggle Line Comment", "vii.lineComment", C.Commands.toggleComment);
 	reg("Duplicate Lines", "vii.duplicateLines", C.Commands.duplicateLines);
 	reg("Join Lines", "vii.joinLines", C.Commands.joinLines);
@@ -58,32 +58,32 @@ define(function (require, exports, module) {
 		}
 		switch(key){
 			case C.LEFT:
-			case C.RIGHT:		C.Cursor.move(key);			break;
-			case C.UP:			C.cm.moveV(-1, "line"); 	break;
-			case C.DOWN:		C.cm.moveV(1, "line");		break;
-			case C.HOME:		cmd("goLineStartSmart");	break;
-			case C.END:			cmd("goLineEnd");			break;
-			case C.SCROLLUP:	C.Commands.scroll(true);		break;
-			case C.SCROLLDN:	C.Commands.scroll(false); 	break;
-			case C.DOCHOME:		cmd("goDocStart");			break;
-			case C.DOCEND:		cmd("goDocEnd");			break;
-			case C.UP10:		C.Cursor.move10(true);		break;
-			case C.DOWN10:		C.Cursor.move10(false); 		break;
-			case C.CENTER:		C.Commands.centerCursor();	break;
-			case C.FOCUS:		C.Cursor.focusAtCenter(); 	break;
-			case C.LINEUP:		exe('edit.lineUp');			break;
-			case C.LINEDOWN:	exe('edit.lineDown');		break;
-			case C.SMARTSELECT: C.Select.smartSelect();		break;
-			case C.SELECTLINE: 	C.Select.line();				break;
+			case C.RIGHT:		    C.Cursor.move(key);			    break;
+			case C.UP:			    C.cm.moveV(-1, "line"); 	  break;
+			case C.DOWN:		    C.cm.moveV(1, "line");		  break;
+			case C.HOME:		    cmd("goLineStartSmart");	  break;
+			case C.END:			    cmd("goLineEnd");			      break;
+			case C.SCROLLUP:	  C.Commands.scroll(true);		break;
+			case C.SCROLLDN:	  C.Commands.scroll(false); 	break;
+			case C.DOCHOME:		  cmd("goDocStart");			    break;
+			case C.DOCEND:		  cmd("goDocEnd");			      break;
+			case C.UP10:		    C.Cursor.move10(true);		  break;
+			case C.DOWN10:		  C.Cursor.move10(false); 		break;
+			case C.CENTER:		  C.Commands.centerCursor();	break;
+			case C.FOCUS:		    C.Cursor.focusAtCenter(); 	break;
+			case C.LINEUP:		  exe('edit.lineUp');			    break;
+			case C.LINEDOWN:	  exe('edit.lineDown');		    break;
+			case C.SMARTSELECT: C.Select.smartSelect();		  break;
+			case C.SELECTLINE: 	C.Select.line();				    break;
 			case C.TOGGLESELECT:C.Select.selectToggle();		break;
-			case C.SWAPANCHOR: 	C.Select.swapAnchor();		break;
-			case C.NEXTDOC:		exe('navigate.nextDoc');	break;
-			case C.PREVDOC:		exe('navigate.prevDoc');	break;
-			case C.FIND:		exe('edit.find'); 			break;
-			case C.FINDNEXT:	exe('edit.findNext'); 		break;
-			case C.FINDPREV:	exe('edit.findPrevious'); 	break;
-			case C.REPLACE: 	exe('edit.replace');		break;
-			case C.MULTICURSOR: console.log(Test.nn++);	break;
+			case C.SWAPANCHOR: 	C.Select.swapAnchor();		  break;
+			case C.NEXTDOC:		  exe('navigate.nextDoc');	  break;
+			case C.PREVDOC:		  exe('navigate.prevDoc');	  break;
+			case C.FIND:		    exe('edit.find'); 			    break;
+			case C.FINDNEXT:	  exe('edit.findNext'); 		  break;
+			case C.FINDPREV:	  exe('edit.findPrevious'); 	break;
+			case C.REPLACE: 	  exe('edit.replace');		    break;
+			case C.MULTICURSOR: console.log(Test.nn++);	    break;
 		}
 	}
 
